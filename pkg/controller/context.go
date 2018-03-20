@@ -4,23 +4,20 @@ import (
 	"time"
 )
 
-type project struct {
-	Name               string
-	ID                 string
-	LastBuildVersion   string
-	LastBuildOK        bool
-	LastBuildTime      time.Time
-	LastBuildEventType string
+type Project struct {
+	Name      string
+	ID        string
+	LastBuild *Build
 }
 
 // ProjectListPageContext has the required information to
 // render a project list page.
 type ProjectListPageContext struct {
-	Projects []*project
+	Projects []*Project
 	Error    error
 }
 
-type build struct {
+type Build struct {
 	ID         string
 	Version    string
 	Running    bool
@@ -37,13 +34,14 @@ type ProjectBuildListPageContext struct {
 	ProjectURL  string
 	ProjectNS   string
 
-	Builds []*build
+	Builds []*Build
 	Error  error
 }
 
-type job struct {
+type Job struct {
 	ID         string
 	Name       string
+	Image      string
 	Running    bool
 	FinishedOK bool
 	Started    time.Time
@@ -53,7 +51,15 @@ type job struct {
 // BuildJobListPageContext has the required information to
 // render a build job list page.
 type BuildJobListPageContext struct {
-	BuildInfo *build
-	Jobs      []*job
+	BuildInfo *Build
+	Jobs      []*Job
 	Error     error
+}
+
+// JobLogPageContext has the required information to
+// render a job log page.
+type JobLogPageContext struct {
+	Job   *Job
+	Log   []byte
+	Error error
 }
