@@ -70,8 +70,7 @@ func (i *Index) createLayout() {
 // Render satisfies Renderer interface.
 func (i *Index) Render() error {
 	// Load the initial page.
-	i.router.LoadAbout()
-	//i.router.LoadProjectList()
+	i.router.LoadProjectList()
 
 	// Run
 	i.app.SetRoot(i.layout, true)

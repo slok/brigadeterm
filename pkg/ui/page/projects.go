@@ -90,18 +90,21 @@ func (p *ProjectList) fill(ctx *controller.ProjectListPageContext) {
 	for _, project := range ctx.Projects {
 
 		// Select row color.
-		color := tcell.ColorRed
-		if project.LastBuildOK {
-			color = tcell.ColorGreen
+		color := tcell.ColorWhite
+		if !project.LastBuild.Running {
+			color = tcell.ColorRed
+			if project.LastBuild.FinishedOK {
+				color = tcell.ColorGreen
+			}
 		}
 
 		// Set the index so we can get the project ID on selection.
 		projectNameIDIndex[project.Name] = project.ID
 
 		p.projectsTable.SetCell(rowPosition, 0, &tview.TableCell{Text: project.Name, Align: tview.AlignLeft, Color: color})
-		p.projectsTable.SetCell(rowPosition, 1, &tview.TableCell{Text: project.LastBuildEventType, Align: tview.AlignLeft, Color: color})
-		p.projectsTable.SetCell(rowPosition, 2, &tview.TableCell{Text: project.LastBuildVersion, Align: tview.AlignLeft, Color: color})
-		timeAgo := time.Now().Sub(project.LastBuildTime)
+		p.projectsTable.SetCell(rowPosition, 1, &tview.TableCell{Text: project.LastBuild.EventType, Align: tview.AlignLeft, Color: color})
+		p.projectsTable.SetCell(rowPosition, 2, &tview.TableCell{Text: project.LastBuild.Version, Align: tview.AlignLeft, Color: color})
+		timeAgo := time.Now().Sub(project.LastBuild.Started)
 		p.projectsTable.SetCell(rowPosition, 3, &tview.TableCell{Text: fmt.Sprintf("%v ago", timeAgo), Align: tview.AlignLeft, Color: color})
 
 		rowPosition++

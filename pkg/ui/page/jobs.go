@@ -1,6 +1,7 @@
 package page
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -18,6 +19,8 @@ const (
 	pipelineBlockString = `█`
 	pipelineStepTotal   = 50
 	pipelineColor       = tcell.ColorYellow
+
+	buildJobListUsage = `[yellow](F5) [white]Reload	[yellow](ESC) [white]Back`
 )
 
 // BuildJobList is the page where a build job list will be available.
@@ -25,10 +28,10 @@ type BuildJobList struct {
 	controller controller.Controller
 	router     *Router
 
-	// page layout
+	// page layout.
 	layout tview.Primitive
 
-	// components
+	// components.
 	jobsPipeline *tview.Table
 	jobsList     *tview.Table
 	usage        *tview.TextView
@@ -54,12 +57,14 @@ func (b *BuildJobList) createComponents() {
 		SetBorder(true).
 		SetTitle("Pipeline timeline")
 
+	// Create the job layout (jobs + log).
 	b.jobsList = tview.NewTable().
 		SetSelectable(true, false)
 	b.jobsList.
 		SetBorder(true).
 		SetTitle("Jobs")
 
+	// Usage.
 	b.usage = tview.NewTextView().
 		SetDynamicColors(true)
 
@@ -69,7 +74,6 @@ func (b *BuildJobList) createComponents() {
 		AddItem(b.jobsPipeline, 0, 2, false).
 		AddItem(b.jobsList, 0, 6, true).
 		AddItem(b.usage, 1, 1, false)
-
 }
 
 // Register satisfies Page interface.
@@ -87,24 +91,32 @@ func (b *BuildJobList) BeforeLoad() {
 func (b *BuildJobList) Refresh(projectID, buildID string) {
 	ctx := b.controller.BuildJobListPageContext(buildID)
 	// TODO: check error.
-	b.fill(ctx)
+	b.fill(projectID, buildID, ctx)
 
 	// Set key handlers.
-	//b.buildsTable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-	//	switch event.Key() {
-	//	case tcell.KeyF5:
-	//		// Reload.
-	//	case tcell.KeyEsc:
-	//		// Back.
-	//		b.router.LoadProjectBuildList(projectID)
-	//	}
-	//	return event
-	//})
+	b.jobsList.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Key() {
+		case tcell.KeyF5:
+			// Reload.
+			b.router.LoadBuildJobList(projectID, buildID)
+		case tcell.KeyEsc:
+			// Back.
+			b.router.LoadProjectBuildList(projectID)
+		}
+		return event
+	})
 
 }
 
-func (b *BuildJobList) fill(ctx *controller.BuildJobListPageContext) {
+func (b *BuildJobList) fill(projectID, buildID string, ctx *controller.BuildJobListPageContext) {
+	b.fillUsage()
 	b.fillPipelineTimeline(ctx)
+	b.fillJobsList(projectID, buildID, ctx)
+}
+
+func (b *BuildJobList) fillUsage() {
+	b.usage.Clear()
+	b.usage.SetText(buildJobListUsage)
 }
 
 func (b *BuildJobList) fillPipelineTimeline(ctx *controller.BuildJobListPageContext) {
@@ -121,7 +133,7 @@ func (b *BuildJobList) fillPipelineTimeline(ctx *controller.BuildJobListPageCont
 	// Create one row for each job.
 	for i, job := range ctx.Jobs {
 		// Name of job.
-		b.jobsPipeline.SetCell(i*rowsBetweenMultiplier, 0, &tview.TableCell{Text: job.Name, Align: tview.AlignCenter, Color: pipelineColor})
+		b.jobsPipeline.SetCell(i*rowsBetweenMultiplier, 0, &tview.TableCell{Text: job.Name, Align: tview.AlignLeft, Color: pipelineColor})
 
 		// Get length of pipeline.
 		jobDuration := job.Ended.Sub(job.Started)
@@ -156,4 +168,47 @@ func (b *BuildJobList) getJobTimingData(ctx *controller.BuildJobListPageContext)
 	}
 
 	return first, last, last.Sub(first)
+}
+
+func (b *BuildJobList) fillJobsList(projectID, buildID string, ctx *controller.BuildJobListPageContext) {
+	b.jobsList.Clear()
+
+	// Set header.
+	b.jobsList.SetCell(0, 0, &tview.TableCell{Text: "Name", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	b.jobsList.SetCell(0, 1, &tview.TableCell{Text: "Image", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	b.jobsList.SetCell(0, 2, &tview.TableCell{Text: "ID", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	b.jobsList.SetCell(0, 3, &tview.TableCell{Text: "Started", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	b.jobsList.SetCell(0, 4, &tview.TableCell{Text: "Duration", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+
+	// TODO order by time.
+	rowPosition := 1
+	for _, job := range ctx.Jobs {
+		// Select row color.
+		color := tcell.ColorWhite
+		if !job.Running {
+			if job.FinishedOK {
+				color = tcell.ColorGreen
+			} else {
+				color = tcell.ColorRed
+			}
+		}
+		// Fill table.
+		b.jobsList.SetCell(rowPosition, 0, &tview.TableCell{Text: job.Name, Align: tview.AlignLeft, Color: color})
+		b.jobsList.SetCell(rowPosition, 1, &tview.TableCell{Text: job.Image, Align: tview.AlignLeft, Color: color})
+		b.jobsList.SetCell(rowPosition, 2, &tview.TableCell{Text: job.ID, Align: tview.AlignLeft, Color: color})
+		if !job.Running {
+			timeAgo := time.Now().Sub(job.Ended)
+			b.jobsList.SetCell(rowPosition, 3, &tview.TableCell{Text: fmt.Sprintf("%v ago", timeAgo), Align: tview.AlignLeft, Color: color})
+			duration := job.Ended.Sub(job.Started)
+			b.jobsList.SetCell(rowPosition, 4, &tview.TableCell{Text: fmt.Sprintf("%v", duration), Align: tview.AlignLeft, Color: color})
+		}
+		rowPosition++
+	}
+
+	// Set selectable to call our jobs.
+	b.jobsList.SetSelectedFunc(func(row, column int) {
+		jobID := b.jobsList.GetCell(row, 2).Text
+		// Load log page
+		b.router.LoadJobLog(projectID, buildID, jobID)
+	})
 }
