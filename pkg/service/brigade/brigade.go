@@ -1,6 +1,7 @@
 package brigade
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/Azure/brigade/pkg/storage"
@@ -11,10 +12,14 @@ import (
 // Service is the service where all the brigade data will be retrieved
 // and prepared with the information that this applications needs.
 type Service interface {
-	// GetAllProjects will get all the projects that are on brigade.
-	GetAllProjects() ([]*brigademodel.Project, error)
-	//// GetProjectBuilds will get all the builds of a project.
-	//GetProjectBuilds(projectID string) ([]*brigademodel.Build, error)
+	// GetProjectBuilds will get one project.
+	GetProject(projectID string) (*brigademodel.Project, error)
+	// GetProjectLastBuild will get projects last build.
+	GetProjectLastBuild(projectID string) (*brigademodel.Build, error)
+	// GetProjects will get all the projects that are on brigade.
+	GetProjects() ([]*brigademodel.Project, error)
+	// GetProjectBuilds will get all the builds of a project.
+	GetProjectBuilds(project *brigademodel.Project) ([]*brigademodel.Build, error)
 	//// GetBuildJobs will get all the jobs of a build.
 	//GetBuildJobs(BuildID string) ([]*brigademodel.Job, error)
 }
@@ -31,8 +36,47 @@ func NewService(brigadestore storage.Store) Service {
 	}
 }
 
-// GetAllProjects satisfies Repository interface.
-func (s *service) GetAllProjects() ([]*brigademodel.Project, error) {
+func (s *service) GetProject(projectID string) (*brigademodel.Project, error) {
+	prj, err := s.client.GetProject(projectID)
+
+	if err != nil {
+		return nil, err
+	}
+	res := brigademodel.Project(*prj)
+	return &res, nil
+}
+
+func (s *service) GetProjectLastBuild(projectID string) (*brigademodel.Build, error) {
+	prj, err := s.client.GetProject(projectID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the available builds.
+	builds, err := s.client.GetProjectBuilds(prj)
+	if err != nil {
+		return nil, err
+	}
+	switch len(builds) {
+	case 0:
+		return nil, fmt.Errorf("no builds available")
+	case 1:
+		return builds[0], nil
+	}
+
+	// Order builds.
+	sort.Slice(builds, func(i, j int) bool {
+		return builds[i].Worker.StartTime.Before(builds[j].Worker.StartTime)
+	})
+
+	// Get last one.
+	lastBuild := brigademodel.Build(*builds[len(builds)-1])
+	return &lastBuild, nil
+}
+
+// GetProjects satisfies Service interface.
+func (s *service) GetProjects() ([]*brigademodel.Project, error) {
 	prjs, err := s.client.GetProjects()
 
 	if err != nil {
@@ -53,26 +97,26 @@ func (s *service) GetAllProjects() ([]*brigademodel.Project, error) {
 	return prjList, nil
 }
 
-// // GetAllProjects satisfies Repository interface.
-// func (r *repository) GetProjectBuilds(projectID string) ([]*brigademodel.Build, error) {
-// 	pr, err := r.client.GetProject(projectID)
-// 	if err != nil {
-// 		return []*brigademodel.Build{}, err
-// 	}
+// GetAllProjects satisfies Service interface.
+func (s *service) GetProjectBuilds(project *brigademodel.Project) ([]*brigademodel.Build, error) {
+	pr, err := s.client.GetProject(project.ID)
+	if err != nil {
+		return []*brigademodel.Build{}, err
+	}
 
-// 	builds, err := r.client.GetProjectBuilds(pr)
-// 	if err != nil {
-// 		return []*brigademodel.Build{}, err
-// 	}
+	builds, err := s.client.GetProjectBuilds(pr)
+	if err != nil {
+		return []*brigademodel.Build{}, err
+	}
 
-// 	res := make([]*brigademodel.Build, len(builds))
-// 	for i, build := range builds {
-// 		bl := brigademodel.Build(*build)
-// 		res[i] = &bl
-// 	}
+	res := make([]*brigademodel.Build, len(builds))
+	for i, build := range builds {
+		bl := brigademodel.Build(*build)
+		res[i] = &bl
+	}
 
-// 	return res, nil
-// }
+	return res, nil
+}
 
 // // GetBuildJobs satisfies Repository interface.
 // func (r *repository) GetBuildJobs(BuildID string) ([]*brigademodel.Job, error) {

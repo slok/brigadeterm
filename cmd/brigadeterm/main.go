@@ -45,8 +45,6 @@ func (m *Main) Run() error {
 
 	// Create controller.
 	uictrl := controller.NewController(brigadeService)
-	// Fake for now
-	uictrl = controller.NewFakeController()
 
 	// Create the terminal app.
 	app := tview.NewApplication()

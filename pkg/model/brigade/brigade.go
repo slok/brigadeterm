@@ -12,6 +12,3 @@ type Build = brigade.Build
 
 // Job is a brigade job.
 type Job = brigade.Job
-
-// JobStatus is thhe job status.
-type JobStatus = brigade.JobStatus
