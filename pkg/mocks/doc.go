@@ -5,4 +5,4 @@ testing and integration tests whenever is possible.
 package mocks // import "github.com/slok/brigadeterm/pkg/mocks"
 
 // Service mocks.
-//go:generate mockery -output ./service/repository/brigade -outpkg brigade -dir ../service/repository/brigade -name Repository
+//go:generate mockery -output ./service/brigade -outpkg brigade -dir ../service/brigade -name Service
