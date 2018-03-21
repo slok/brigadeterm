@@ -182,40 +182,45 @@ func (b *BuildJobList) fillJobsList(projectID, buildID string, ctx *controller.B
 	b.jobsList.Clear()
 
 	// Set header.
-	b.jobsList.SetCell(0, 0, &tview.TableCell{Text: "Name", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	b.jobsList.SetCell(0, 1, &tview.TableCell{Text: "Image", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	b.jobsList.SetCell(0, 2, &tview.TableCell{Text: "ID", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	b.jobsList.SetCell(0, 3, &tview.TableCell{Text: "Started", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	b.jobsList.SetCell(0, 4, &tview.TableCell{Text: "Duration", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	b.jobsList.SetCell(0, 0, &tview.TableCell{Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	b.jobsList.SetCell(0, 1, &tview.TableCell{Text: "Name", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	b.jobsList.SetCell(0, 2, &tview.TableCell{Text: "Image", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	b.jobsList.SetCell(0, 3, &tview.TableCell{Text: "ID", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	b.jobsList.SetCell(0, 4, &tview.TableCell{Text: "Started", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	b.jobsList.SetCell(0, 5, &tview.TableCell{Text: "Duration", Align: tview.AlignCenter, Color: tcell.ColorYellow})
 
 	// TODO order by time.
 	rowPosition := 1
 	for _, job := range ctx.Jobs {
-		// Select row color.
+		// Select row color and symbol.
+		symbol := runningSymbol
 		color := tcell.ColorWhite
 		if !job.Running {
 			if job.FinishedOK {
+				symbol = okSymbol
 				color = tcell.ColorGreen
 			} else {
+				symbol = failedSymbol
 				color = tcell.ColorRed
 			}
 		}
 		// Fill table.
-		b.jobsList.SetCell(rowPosition, 0, &tview.TableCell{Text: job.Name, Align: tview.AlignLeft, Color: color})
-		b.jobsList.SetCell(rowPosition, 1, &tview.TableCell{Text: job.Image, Align: tview.AlignLeft, Color: color})
-		b.jobsList.SetCell(rowPosition, 2, &tview.TableCell{Text: job.ID, Align: tview.AlignLeft, Color: color})
+		b.jobsList.SetCell(rowPosition, 0, &tview.TableCell{Text: symbol, Align: tview.AlignLeft, Color: color})
+		b.jobsList.SetCell(rowPosition, 1, &tview.TableCell{Text: job.Name, Align: tview.AlignLeft, Color: color})
+		b.jobsList.SetCell(rowPosition, 2, &tview.TableCell{Text: job.Image, Align: tview.AlignLeft, Color: color})
+		b.jobsList.SetCell(rowPosition, 3, &tview.TableCell{Text: job.ID, Align: tview.AlignLeft, Color: color})
 		if !job.Running {
 			timeAgo := time.Since(job.Ended).Truncate(time.Second * 1)
-			b.jobsList.SetCell(rowPosition, 3, &tview.TableCell{Text: fmt.Sprintf("%v ago", timeAgo), Align: tview.AlignLeft, Color: color})
+			b.jobsList.SetCell(rowPosition, 4, &tview.TableCell{Text: fmt.Sprintf("%v ago", timeAgo), Align: tview.AlignLeft, Color: color})
 			duration := job.Ended.Sub(job.Started).Truncate(time.Second * 1)
-			b.jobsList.SetCell(rowPosition, 4, &tview.TableCell{Text: fmt.Sprintf("%v", duration), Align: tview.AlignLeft, Color: color})
+			b.jobsList.SetCell(rowPosition, 5, &tview.TableCell{Text: fmt.Sprintf("%v", duration), Align: tview.AlignLeft, Color: color})
 		}
 		rowPosition++
 	}
 
 	// Set selectable to call our jobs.
 	b.jobsList.SetSelectedFunc(func(row, column int) {
-		jobID := b.jobsList.GetCell(row, 2).Text
+		jobID := b.jobsList.GetCell(row, 3).Text
 		// Load log page
 		b.router.LoadJobLog(projectID, buildID, jobID)
 	})

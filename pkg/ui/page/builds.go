@@ -118,40 +118,46 @@ func (p *ProjectBuildList) fill(projectID string, ctx *controller.ProjectBuildLi
 	p.buildsTable.Clear()
 
 	// Set header.
-	p.buildsTable.SetCell(0, 0, &tview.TableCell{Text: "Event type", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	p.buildsTable.SetCell(0, 1, &tview.TableCell{Text: "Version", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	p.buildsTable.SetCell(0, 2, &tview.TableCell{Text: "ID", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	p.buildsTable.SetCell(0, 3, &tview.TableCell{Text: "End", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	p.buildsTable.SetCell(0, 4, &tview.TableCell{Text: "Duration", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	p.buildsTable.SetCell(0, 0, &tview.TableCell{Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	p.buildsTable.SetCell(0, 1, &tview.TableCell{Text: "Event type", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	p.buildsTable.SetCell(0, 2, &tview.TableCell{Text: "Version", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	p.buildsTable.SetCell(0, 3, &tview.TableCell{Text: "ID", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	p.buildsTable.SetCell(0, 4, &tview.TableCell{Text: "End", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	p.buildsTable.SetCell(0, 5, &tview.TableCell{Text: "Duration", Align: tview.AlignCenter, Color: tcell.ColorYellow})
 
 	// TODO order by time.
 	rowPosition := 1
 	for _, build := range ctx.Builds {
-		// Select row color.
+
+		// Select row color and symbol.
+		symbol := runningSymbol
 		color := tcell.ColorWhite
 		if !build.Running {
 			if build.FinishedOK {
 				color = tcell.ColorGreen
+				symbol = okSymbol
 			} else {
 				color = tcell.ColorRed
+				symbol = failedSymbol
 			}
 		}
 		// Fill table.
-		p.buildsTable.SetCell(rowPosition, 0, &tview.TableCell{Text: build.EventType, Align: tview.AlignLeft, Color: color})
-		p.buildsTable.SetCell(rowPosition, 1, &tview.TableCell{Text: build.Version, Align: tview.AlignLeft, Color: color})
-		p.buildsTable.SetCell(rowPosition, 2, &tview.TableCell{Text: build.ID, Align: tview.AlignLeft, Color: color})
+		p.buildsTable.SetCell(rowPosition, 0, &tview.TableCell{Text: symbol, Align: tview.AlignLeft, Color: color})
+		p.buildsTable.SetCell(rowPosition, 1, &tview.TableCell{Text: build.EventType, Align: tview.AlignLeft, Color: color})
+		p.buildsTable.SetCell(rowPosition, 2, &tview.TableCell{Text: build.Version, Align: tview.AlignLeft, Color: color})
+		p.buildsTable.SetCell(rowPosition, 3, &tview.TableCell{Text: build.ID, Align: tview.AlignLeft, Color: color})
 		if !build.Running {
 			timeAgo := time.Since(build.Ended).Truncate(time.Second * 1)
-			p.buildsTable.SetCell(rowPosition, 3, &tview.TableCell{Text: fmt.Sprintf("%v ago", timeAgo), Align: tview.AlignLeft, Color: color})
+			p.buildsTable.SetCell(rowPosition, 4, &tview.TableCell{Text: fmt.Sprintf("%v ago", timeAgo), Align: tview.AlignLeft, Color: color})
 			duration := build.Ended.Sub(build.Started).Truncate(time.Second * 1)
-			p.buildsTable.SetCell(rowPosition, 4, &tview.TableCell{Text: fmt.Sprintf("%v", duration), Align: tview.AlignLeft, Color: color})
+			p.buildsTable.SetCell(rowPosition, 5, &tview.TableCell{Text: fmt.Sprintf("%v", duration), Align: tview.AlignLeft, Color: color})
 		}
 		rowPosition++
 	}
 
 	// Set selectable to call our jobs.
 	p.buildsTable.SetSelectedFunc(func(row, column int) {
-		buildID := p.buildsTable.GetCell(row, 2).Text
+		buildID := p.buildsTable.GetCell(row, 3).Text
 
 		// Load build job list page.
 		p.router.LoadBuildJobList(projectID, buildID)
