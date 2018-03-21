@@ -130,6 +130,14 @@ func (s *service) GetProjectBuilds(project *brigademodel.Project) ([]*brigademod
 		res[i] = &bl
 	}
 
+	// Order builds in descending order (last ones first).
+	sort.Slice(res, func(i, j int) bool {
+		if res[i].Worker == nil || res[j].Worker == nil {
+			return false
+		}
+		return res[i].Worker.StartTime.After(res[j].Worker.StartTime)
+	})
+
 	return res, nil
 }
 
@@ -149,6 +157,11 @@ func (s *service) GetBuildJobs(BuildID string) ([]*brigademodel.Job, error) {
 		j := brigademodel.Job(*job)
 		res[i] = &j
 	}
+
+	// Order jobs in ascending order (first ones first).
+	sort.Slice(res, func(i, j int) bool {
+		return res[i].StartTime.Before(res[j].StartTime)
+	})
 
 	return res, nil
 }
