@@ -232,3 +232,128 @@ func TestControllerProjectBuildListPageContext(t *testing.T) {
 		})
 	}
 }
+
+func TestControllerBuildJobListPageContext(t *testing.T) {
+	start := time.Now().Add(-5 * time.Minute)
+	end := time.Now().Add(-4 * time.Minute)
+
+	tests := []struct {
+		name   string
+		build  *brigademodel.Build
+		jobs   []*brigademodel.Job
+		expCtx *controller.BuildJobListPageContext
+	}{
+		{
+			name: "Multiple jobs should return multiple jobs context.",
+			build: &brigademodel.Build{
+				ID:       "build1",
+				Revision: &azurebrigade.Revision{Commit: "1234567890"},
+				Worker: &azurebrigade.Worker{
+					Status:    azurebrigade.JobSucceeded,
+					StartTime: start,
+					EndTime:   end,
+				},
+				Type: "testEvent",
+			},
+			jobs: []*brigademodel.Job{
+				&brigademodel.Job{
+					ID:        "j1",
+					Name:      "job-1",
+					Image:     "myimage/image:v0.1.0",
+					Status:    azurebrigade.JobRunning,
+					StartTime: start,
+					EndTime:   end,
+				},
+				&brigademodel.Job{
+					ID:        "j2",
+					Name:      "job-2",
+					Image:     "myimage/image:v0.2.0",
+					Status:    azurebrigade.JobPending,
+					StartTime: start,
+					EndTime:   end,
+				},
+				&brigademodel.Job{
+					ID:        "j3",
+					Name:      "job-3",
+					Image:     "myimage/image:v0.3.0",
+					Status:    azurebrigade.JobSucceeded,
+					StartTime: start,
+					EndTime:   end,
+				},
+				&brigademodel.Job{
+					ID:        "j4",
+					Name:      "job-4",
+					Image:     "myimage/image:v0.4.0",
+					Status:    azurebrigade.JobFailed,
+					StartTime: start,
+					EndTime:   end,
+				},
+			},
+			expCtx: &controller.BuildJobListPageContext{
+				BuildInfo: &controller.Build{
+					ID:         "build1",
+					Version:    "1234567890",
+					Running:    false,
+					FinishedOK: true,
+					EventType:  "testEvent",
+					Started:    start,
+					Ended:      end,
+				},
+				Jobs: []*controller.Job{
+					&controller.Job{
+						ID:         "j1",
+						Name:       "job-1",
+						Image:      "myimage/image:v0.1.0",
+						Running:    true,
+						FinishedOK: false,
+						Started:    start,
+						Ended:      end,
+					},
+					&controller.Job{
+						ID:         "j2",
+						Name:       "job-2",
+						Image:      "myimage/image:v0.2.0",
+						Running:    true,
+						FinishedOK: false,
+						Started:    start,
+						Ended:      end,
+					},
+					&controller.Job{
+						ID:         "j3",
+						Name:       "job-3",
+						Image:      "myimage/image:v0.3.0",
+						Running:    false,
+						FinishedOK: true,
+						Started:    start,
+						Ended:      end,
+					},
+					&controller.Job{
+						ID:         "j4",
+						Name:       "job-4",
+						Image:      "myimage/image:v0.4.0",
+						Running:    false,
+						FinishedOK: false,
+						Started:    start,
+						Ended:      end,
+					},
+				},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert := assert.New(t)
+
+			// Mocks.
+			mb := &mbrigade.Service{}
+			mb.On("GetBuild", mock.Anything).Return(test.build, nil)
+			mb.On("GetBuildJobs", mock.Anything).Return(test.jobs, nil)
+
+			c := controller.NewController(mb)
+			ctx := c.BuildJobListPageContext("whatever")
+
+			assert.Equal(test.expCtx, ctx)
+		})
+	}
+}

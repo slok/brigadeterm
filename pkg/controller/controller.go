@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"time"
 
 	azurebrigade "github.com/Azure/brigade/pkg/brigade"
 
@@ -91,11 +92,28 @@ func (c *controller) ProjectBuildListPageContext(projectID string) *ProjectBuild
 	}
 }
 
-// func (c *controller) BuildJobListPageContext(projectID string) *BuildJobListPageContext {
-// 	return &BuildJobListPageContext{
-// 		Error: fmt.Errorf("not implentented"),
-// 	}
-// }
+func (c *controller) BuildJobListPageContext(buildID string) *BuildJobListPageContext {
+	build, err := c.brigade.GetBuild(buildID)
+
+	jobs, err := c.brigade.GetBuildJobs(buildID)
+	if err != nil {
+		return &BuildJobListPageContext{
+			Error: fmt.Errorf("there was an error while getting the jobs from brigade: %s", err),
+		}
+	}
+
+	ctxBuild := c.transformBuild(build)
+
+	ctxJobs := make([]*Job, len(jobs))
+	for i, j := range jobs {
+		ctxJobs[i] = c.transformJob(j)
+	}
+
+	return &BuildJobListPageContext{
+		BuildInfo: ctxBuild,
+		Jobs:      ctxJobs,
+	}
+}
 
 // func (c *controller) JobLogPageContext(jobID string) *JobLogPageContext {
 // 	return &JobLogPageContext{
@@ -104,13 +122,21 @@ func (c *controller) ProjectBuildListPageContext(projectID string) *ProjectBuild
 // }
 
 func (c *controller) transformBuild(b *brigademodel.Build) *Build {
-	isRunning := false
-	ok := false
-	switch b.Worker.Status {
-	case azurebrigade.JobRunning, azurebrigade.JobPending:
-		isRunning = true
-	case azurebrigade.JobSucceeded:
-		ok = true
+	var isRunning bool
+	var ok bool
+	var start time.Time
+	var end time.Time
+
+	if b.Worker != nil {
+		start = b.Worker.StartTime
+		end = b.Worker.EndTime
+
+		switch b.Worker.Status {
+		case azurebrigade.JobRunning, azurebrigade.JobPending:
+			isRunning = true
+		case azurebrigade.JobSucceeded:
+			ok = true
+		}
 	}
 
 	return &Build{
@@ -119,7 +145,28 @@ func (c *controller) transformBuild(b *brigademodel.Build) *Build {
 		Running:    isRunning,
 		FinishedOK: ok,
 		EventType:  b.Type,
-		Started:    b.Worker.StartTime,
-		Ended:      b.Worker.EndTime,
+		Started:    start,
+		Ended:      end,
+	}
+}
+
+func (c *controller) transformJob(j *brigademodel.Job) *Job {
+	isRunning := false
+	ok := false
+	switch j.Status {
+	case azurebrigade.JobRunning, azurebrigade.JobPending:
+		isRunning = true
+	case azurebrigade.JobSucceeded:
+		ok = true
+	}
+
+	return &Job{
+		ID:         j.ID,
+		Name:       j.Name,
+		Image:      j.Image,
+		Running:    isRunning,
+		FinishedOK: ok,
+		Started:    j.StartTime,
+		Ended:      j.EndTime,
 	}
 }

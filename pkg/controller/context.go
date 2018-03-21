@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Project represents a Brigade project.
 type Project struct {
 	Name      string
 	ID        string
@@ -17,6 +18,7 @@ type ProjectListPageContext struct {
 	Error    error
 }
 
+// Build is a project build.
 type Build struct {
 	ID         string
 	Version    string
@@ -38,6 +40,7 @@ type ProjectBuildListPageContext struct {
 	Error  error
 }
 
+// Job is a build job.
 type Job struct {
 	ID         string
 	Name       string

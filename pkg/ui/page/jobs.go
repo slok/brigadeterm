@@ -151,6 +151,9 @@ func (b *BuildJobList) fillPipelineTimeline(ctx *controller.BuildJobListPageCont
 }
 
 func (b *BuildJobList) getJobTimingData(ctx *controller.BuildJobListPageContext) (first, last time.Time, totalDuration time.Duration) {
+	if len(ctx.Jobs) < 1 {
+		return time.Time{}, time.Time{}, 0
+	}
 	first = ctx.Jobs[0].Started
 	last = ctx.Jobs[0].Ended
 

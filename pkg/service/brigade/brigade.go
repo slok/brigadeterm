@@ -18,10 +18,12 @@ type Service interface {
 	GetProjectLastBuild(projectID string) (*brigademodel.Build, error)
 	// GetProjects will get all the projects that are on brigade.
 	GetProjects() ([]*brigademodel.Project, error)
+	// GetBuild will get one build.
+	GetBuild(buildID string) (*brigademodel.Build, error)
 	// GetProjectBuilds will get all the builds of a project.
 	GetProjectBuilds(project *brigademodel.Project) ([]*brigademodel.Build, error)
-	//// GetBuildJobs will get all the jobs of a build.
-	//GetBuildJobs(BuildID string) ([]*brigademodel.Job, error)
+	// GetBuildJobs will get all the jobs of a build.
+	GetBuildJobs(BuildID string) ([]*brigademodel.Job, error)
 }
 
 // repository will use kubernetes as repository for the brigade objects.
@@ -67,6 +69,9 @@ func (s *service) GetProjectLastBuild(projectID string) (*brigademodel.Build, er
 
 	// Order builds.
 	sort.Slice(builds, func(i, j int) bool {
+		if builds[i].Worker == nil || builds[j].Worker == nil {
+			return false
+		}
 		return builds[i].Worker.StartTime.Before(builds[j].Worker.StartTime)
 	})
 
@@ -97,6 +102,16 @@ func (s *service) GetProjects() ([]*brigademodel.Project, error) {
 	return prjList, nil
 }
 
+func (s *service) GetBuild(buildID string) (*brigademodel.Build, error) {
+	bld, err := s.client.GetBuild(buildID)
+
+	if err != nil {
+		return nil, err
+	}
+	res := brigademodel.Build(*bld)
+	return &res, nil
+}
+
 // GetAllProjects satisfies Service interface.
 func (s *service) GetProjectBuilds(project *brigademodel.Project) ([]*brigademodel.Build, error) {
 	pr, err := s.client.GetProject(project.ID)
@@ -118,25 +133,25 @@ func (s *service) GetProjectBuilds(project *brigademodel.Project) ([]*brigademod
 	return res, nil
 }
 
-// // GetBuildJobs satisfies Repository interface.
-// func (r *repository) GetBuildJobs(BuildID string) ([]*brigademodel.Job, error) {
-// 	bl, err := r.client.GetBuild(BuildID)
-// 	if err != nil {
-// 		return []*brigademodel.Job{}, err
-// 	}
+// GetBuildJobs satisfies Repository interface.
+func (s *service) GetBuildJobs(BuildID string) ([]*brigademodel.Job, error) {
+	bl, err := s.client.GetBuild(BuildID)
+	if err != nil {
+		return []*brigademodel.Job{}, err
+	}
 
-// 	jobs, err := r.client.GetBuildJobs(bl)
-// 	if err != nil {
-// 		return []*brigademodel.Job{}, err
-// 	}
-// 	res := make([]*brigademodel.Job, len(jobs))
-// 	for i, job := range jobs {
-// 		j := brigademodel.Job(*job)
-// 		res[i] = &j
-// 	}
+	jobs, err := s.client.GetBuildJobs(bl)
+	if err != nil {
+		return []*brigademodel.Job{}, err
+	}
+	res := make([]*brigademodel.Job, len(jobs))
+	for i, job := range jobs {
+		j := brigademodel.Job(*job)
+		res[i] = &j
+	}
 
-// 	return res, nil
-// }
+	return res, nil
+}
 
 // func (r *repository) transformJobStatusToBuildStatus(status brigade.JobStatus) brigademodel.BuildStatus {
 // 	switch status {

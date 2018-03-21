@@ -9,6 +9,52 @@ type Service struct {
 	mock.Mock
 }
 
+// GetBuild provides a mock function with given fields: buildID
+func (_m *Service) GetBuild(buildID string) (*brigade.Build, error) {
+	ret := _m.Called(buildID)
+
+	var r0 *brigade.Build
+	if rf, ok := ret.Get(0).(func(string) *brigade.Build); ok {
+		r0 = rf(buildID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*brigade.Build)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(buildID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetBuildJobs provides a mock function with given fields: BuildID
+func (_m *Service) GetBuildJobs(BuildID string) ([]*brigade.Job, error) {
+	ret := _m.Called(BuildID)
+
+	var r0 []*brigade.Job
+	if rf, ok := ret.Get(0).(func(string) []*brigade.Job); ok {
+		r0 = rf(BuildID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*brigade.Job)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(BuildID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetProject provides a mock function with given fields: projectID
 func (_m *Service) GetProject(projectID string) (*brigade.Project, error) {
 	ret := _m.Called(projectID)
