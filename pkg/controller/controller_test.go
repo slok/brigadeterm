@@ -130,3 +130,105 @@ func TestControllerProjectListPageContext(t *testing.T) {
 		})
 	}
 }
+
+func TestControllerProjectBuildListPageContext(t *testing.T) {
+	start := time.Now().Add(-5 * time.Minute)
+	end := time.Now().Add(-4 * time.Minute)
+
+	tests := []struct {
+		name    string
+		project *brigademodel.Project
+		builds  []*brigademodel.Build
+		expCtx  *controller.ProjectBuildListPageContext
+	}{
+		{
+			name: "Multiple builds should return multiple builds context.",
+			project: &brigademodel.Project{
+				ID:         "prj1",
+				Name:       "project-1",
+				Kubernetes: azurebrigade.Kubernetes{Namespace: "test"},
+				Repo:       azurebrigade.Repo{CloneURL: "git@github.com:slok/brigadeterm"},
+			},
+			builds: []*brigademodel.Build{
+				&brigademodel.Build{
+					ID:       "build1",
+					Revision: &azurebrigade.Revision{Commit: "1234567890"},
+					Worker: &azurebrigade.Worker{
+						Status:    azurebrigade.JobFailed,
+						StartTime: start,
+						EndTime:   end,
+					},
+					Type: "testEvent",
+				},
+				&brigademodel.Build{
+					ID:       "build2",
+					Revision: &azurebrigade.Revision{Commit: "1234567890"},
+					Worker: &azurebrigade.Worker{
+						Status:    azurebrigade.JobSucceeded,
+						StartTime: start,
+						EndTime:   end,
+					},
+					Type: "testEvent",
+				},
+				&brigademodel.Build{
+					ID:       "build3",
+					Revision: &azurebrigade.Revision{Commit: "1234567890"},
+					Worker: &azurebrigade.Worker{
+						Status:    azurebrigade.JobRunning,
+						StartTime: start,
+					},
+					Type: "testEvent",
+				},
+			},
+			expCtx: &controller.ProjectBuildListPageContext{
+				ProjectName: "project-1",
+				ProjectNS:   "test",
+				ProjectURL:  "git@github.com:slok/brigadeterm",
+				Builds: []*controller.Build{
+					&controller.Build{
+						ID:         "build1",
+						Version:    "1234567890",
+						Running:    false,
+						FinishedOK: false,
+						EventType:  "testEvent",
+						Started:    start,
+						Ended:      end,
+					},
+					&controller.Build{
+						ID:         "build2",
+						Version:    "1234567890",
+						Running:    false,
+						FinishedOK: true,
+						EventType:  "testEvent",
+						Started:    start,
+						Ended:      end,
+					},
+					&controller.Build{
+						ID:         "build3",
+						Version:    "1234567890",
+						Running:    true,
+						FinishedOK: false,
+						EventType:  "testEvent",
+						Started:    start,
+					},
+				},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert := assert.New(t)
+
+			// Mocks.
+			mb := &mbrigade.Service{}
+			mb.On("GetProject", mock.Anything).Return(test.project, nil)
+			mb.On("GetProjectBuilds", mock.Anything).Return(test.builds, nil)
+
+			c := controller.NewController(mb)
+			ctx := c.ProjectBuildListPageContext("whatever")
+
+			assert.Equal(test.expCtx, ctx)
+		})
+	}
+}

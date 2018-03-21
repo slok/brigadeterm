@@ -86,7 +86,7 @@ func (c *controller) ProjectBuildListPageContext(projectID string) *ProjectBuild
 	return &ProjectBuildListPageContext{
 		ProjectName: prj.Name,
 		ProjectNS:   prj.Kubernetes.Namespace,
-		ProjectURL:  prj.Github.BaseURL,
+		ProjectURL:  prj.Repo.CloneURL,
 		Builds:      ctxBuilds,
 	}
 }
