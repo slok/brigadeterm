@@ -127,6 +127,11 @@ func (b *BuildJobList) fillPipelineTimeline(ctx *controller.BuildJobListPageCont
 	first, _, totalDuration := b.getJobTimingData(ctx)
 	stepDuration := int(totalDuration.Seconds()) / pipelineStepTotal
 
+	// If there is no duration then don't fill the pipeline
+	if stepDuration == 0 {
+		return
+	}
+
 	offset := 1                // Ignore the first cell (is the name of the job).
 	rowsBetweenMultiplier := 2 // Left a row between job rows.
 
@@ -200,9 +205,9 @@ func (b *BuildJobList) fillJobsList(projectID, buildID string, ctx *controller.B
 		b.jobsList.SetCell(rowPosition, 1, &tview.TableCell{Text: job.Image, Align: tview.AlignLeft, Color: color})
 		b.jobsList.SetCell(rowPosition, 2, &tview.TableCell{Text: job.ID, Align: tview.AlignLeft, Color: color})
 		if !job.Running {
-			timeAgo := time.Now().Sub(job.Ended)
+			timeAgo := time.Since(job.Ended).Truncate(time.Second * 1)
 			b.jobsList.SetCell(rowPosition, 3, &tview.TableCell{Text: fmt.Sprintf("%v ago", timeAgo), Align: tview.AlignLeft, Color: color})
-			duration := job.Ended.Sub(job.Started)
+			duration := job.Ended.Sub(job.Started).Truncate(time.Second * 1)
 			b.jobsList.SetCell(rowPosition, 4, &tview.TableCell{Text: fmt.Sprintf("%v", duration), Align: tview.AlignLeft, Color: color})
 		}
 		rowPosition++

@@ -104,8 +104,8 @@ func (p *ProjectList) fill(ctx *controller.ProjectListPageContext) {
 		p.projectsTable.SetCell(rowPosition, 0, &tview.TableCell{Text: project.Name, Align: tview.AlignLeft, Color: color})
 		p.projectsTable.SetCell(rowPosition, 1, &tview.TableCell{Text: project.LastBuild.EventType, Align: tview.AlignLeft, Color: color})
 		p.projectsTable.SetCell(rowPosition, 2, &tview.TableCell{Text: project.LastBuild.Version, Align: tview.AlignLeft, Color: color})
-		timeAgo := time.Now().Sub(project.LastBuild.Started)
-		p.projectsTable.SetCell(rowPosition, 3, &tview.TableCell{Text: fmt.Sprintf("%v ago", timeAgo), Align: tview.AlignLeft, Color: color})
+		since := time.Since(project.LastBuild.Started).Truncate(time.Second * 1)
+		p.projectsTable.SetCell(rowPosition, 3, &tview.TableCell{Text: fmt.Sprintf("%v ago", since), Align: tview.AlignLeft, Color: color})
 
 		rowPosition++
 	}

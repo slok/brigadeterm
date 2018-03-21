@@ -141,9 +141,9 @@ func (p *ProjectBuildList) fill(projectID string, ctx *controller.ProjectBuildLi
 		p.buildsTable.SetCell(rowPosition, 1, &tview.TableCell{Text: build.Version, Align: tview.AlignLeft, Color: color})
 		p.buildsTable.SetCell(rowPosition, 2, &tview.TableCell{Text: build.ID, Align: tview.AlignLeft, Color: color})
 		if !build.Running {
-			timeAgo := time.Now().Sub(build.Ended)
+			timeAgo := time.Since(build.Ended).Truncate(time.Second * 1)
 			p.buildsTable.SetCell(rowPosition, 3, &tview.TableCell{Text: fmt.Sprintf("%v ago", timeAgo), Align: tview.AlignLeft, Color: color})
-			duration := build.Ended.Sub(build.Started)
+			duration := build.Ended.Sub(build.Started).Truncate(time.Second * 1)
 			p.buildsTable.SetCell(rowPosition, 4, &tview.TableCell{Text: fmt.Sprintf("%v", duration), Align: tview.AlignLeft, Color: color})
 		}
 		rowPosition++
