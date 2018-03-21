@@ -32,13 +32,13 @@ func (_m *Service) GetBuild(buildID string) (*brigade.Build, error) {
 	return r0, r1
 }
 
-// GetBuildJobs provides a mock function with given fields: BuildID
-func (_m *Service) GetBuildJobs(BuildID string) ([]*brigade.Job, error) {
-	ret := _m.Called(BuildID)
+// GetBuildJobs provides a mock function with given fields: BuildID, desc
+func (_m *Service) GetBuildJobs(BuildID string, desc bool) ([]*brigade.Job, error) {
+	ret := _m.Called(BuildID, desc)
 
 	var r0 []*brigade.Job
-	if rf, ok := ret.Get(0).(func(string) []*brigade.Job); ok {
-		r0 = rf(BuildID)
+	if rf, ok := ret.Get(0).(func(string, bool) []*brigade.Job); ok {
+		r0 = rf(BuildID, desc)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*brigade.Job)
@@ -46,8 +46,8 @@ func (_m *Service) GetBuildJobs(BuildID string) ([]*brigade.Job, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(BuildID)
+	if rf, ok := ret.Get(1).(func(string, bool) error); ok {
+		r1 = rf(BuildID, desc)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -78,13 +78,13 @@ func (_m *Service) GetProject(projectID string) (*brigade.Project, error) {
 	return r0, r1
 }
 
-// GetProjectBuilds provides a mock function with given fields: project
-func (_m *Service) GetProjectBuilds(project *brigade.Project) ([]*brigade.Build, error) {
-	ret := _m.Called(project)
+// GetProjectBuilds provides a mock function with given fields: project, desc
+func (_m *Service) GetProjectBuilds(project *brigade.Project, desc bool) ([]*brigade.Build, error) {
+	ret := _m.Called(project, desc)
 
 	var r0 []*brigade.Build
-	if rf, ok := ret.Get(0).(func(*brigade.Project) []*brigade.Build); ok {
-		r0 = rf(project)
+	if rf, ok := ret.Get(0).(func(*brigade.Project, bool) []*brigade.Build); ok {
+		r0 = rf(project, desc)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*brigade.Build)
@@ -92,8 +92,8 @@ func (_m *Service) GetProjectBuilds(project *brigade.Project) ([]*brigade.Build,
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*brigade.Project) error); ok {
-		r1 = rf(project)
+	if rf, ok := ret.Get(1).(func(*brigade.Project, bool) error); ok {
+		r1 = rf(project, desc)
 	} else {
 		r1 = ret.Error(1)
 	}

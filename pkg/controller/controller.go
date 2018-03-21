@@ -72,7 +72,7 @@ func (c *controller) ProjectBuildListPageContext(projectID string) *ProjectBuild
 		}
 	}
 
-	builds, err := c.brigade.GetProjectBuilds(prj)
+	builds, err := c.brigade.GetProjectBuilds(prj, true)
 	if err != nil {
 		return &ProjectBuildListPageContext{
 			Error: fmt.Errorf("there was an error while getting builds from brigade: %s", err),
@@ -95,7 +95,7 @@ func (c *controller) ProjectBuildListPageContext(projectID string) *ProjectBuild
 func (c *controller) BuildJobListPageContext(buildID string) *BuildJobListPageContext {
 	build, err := c.brigade.GetBuild(buildID)
 
-	jobs, err := c.brigade.GetBuildJobs(buildID)
+	jobs, err := c.brigade.GetBuildJobs(buildID, false)
 	if err != nil {
 		return &BuildJobListPageContext{
 			Error: fmt.Errorf("there was an error while getting the jobs from brigade: %s", err),

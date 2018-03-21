@@ -20,10 +20,10 @@ type Service interface {
 	GetProjects() ([]*brigademodel.Project, error)
 	// GetBuild will get one build.
 	GetBuild(buildID string) (*brigademodel.Build, error)
-	// GetProjectBuilds will get all the builds of a project.
-	GetProjectBuilds(project *brigademodel.Project) ([]*brigademodel.Build, error)
-	// GetBuildJobs will get all the jobs of a build.
-	GetBuildJobs(BuildID string) ([]*brigademodel.Job, error)
+	// GetProjectBuilds will get all the builds of a project in descendant or ascendant order.
+	GetProjectBuilds(project *brigademodel.Project, desc bool) ([]*brigademodel.Build, error)
+	// GetBuildJobs will get all the jobs of a build in descendant or ascendant order.
+	GetBuildJobs(BuildID string, desc bool) ([]*brigademodel.Job, error)
 }
 
 // repository will use kubernetes as repository for the brigade objects.
@@ -56,27 +56,16 @@ func (s *service) GetProjectLastBuild(projectID string) (*brigademodel.Build, er
 	}
 
 	// Get the available builds.
-	builds, err := s.client.GetProjectBuilds(prj)
+	builds, err := s.GetProjectBuilds(prj, true)
 	if err != nil {
 		return nil, err
 	}
-	switch len(builds) {
-	case 0:
+	if len(builds) == 0 {
 		return nil, fmt.Errorf("no builds available")
-	case 1:
-		return builds[0], nil
 	}
 
-	// Order builds.
-	sort.Slice(builds, func(i, j int) bool {
-		if builds[i].Worker == nil || builds[j].Worker == nil {
-			return false
-		}
-		return builds[i].Worker.StartTime.Before(builds[j].Worker.StartTime)
-	})
-
 	// Get last one.
-	lastBuild := brigademodel.Build(*builds[len(builds)-1])
+	lastBuild := brigademodel.Build(*builds[0])
 	return &lastBuild, nil
 }
 
@@ -113,7 +102,7 @@ func (s *service) GetBuild(buildID string) (*brigademodel.Build, error) {
 }
 
 // GetAllProjects satisfies Service interface.
-func (s *service) GetProjectBuilds(project *brigademodel.Project) ([]*brigademodel.Build, error) {
+func (s *service) GetProjectBuilds(project *brigademodel.Project, desc bool) ([]*brigademodel.Build, error) {
 	pr, err := s.client.GetProject(project.ID)
 	if err != nil {
 		return []*brigademodel.Build{}, err
@@ -135,14 +124,18 @@ func (s *service) GetProjectBuilds(project *brigademodel.Project) ([]*brigademod
 		if res[i].Worker == nil || res[j].Worker == nil {
 			return false
 		}
-		return res[i].Worker.StartTime.After(res[j].Worker.StartTime)
+
+		if desc {
+			return res[i].Worker.StartTime.After(res[j].Worker.StartTime)
+		}
+		return res[i].Worker.StartTime.Before(res[j].Worker.StartTime)
 	})
 
 	return res, nil
 }
 
 // GetBuildJobs satisfies Repository interface.
-func (s *service) GetBuildJobs(BuildID string) ([]*brigademodel.Job, error) {
+func (s *service) GetBuildJobs(BuildID string, desc bool) ([]*brigademodel.Job, error) {
 	bl, err := s.client.GetBuild(BuildID)
 	if err != nil {
 		return []*brigademodel.Job{}, err
@@ -160,7 +153,11 @@ func (s *service) GetBuildJobs(BuildID string) ([]*brigademodel.Job, error) {
 
 	// Order jobs in ascending order (first ones first).
 	sort.Slice(res, func(i, j int) bool {
+		if desc {
+			return res[i].StartTime.After(res[j].StartTime)
+		}
 		return res[i].StartTime.Before(res[j].StartTime)
+
 	})
 
 	return res, nil

@@ -223,7 +223,7 @@ func TestControllerProjectBuildListPageContext(t *testing.T) {
 			// Mocks.
 			mb := &mbrigade.Service{}
 			mb.On("GetProject", mock.Anything).Return(test.project, nil)
-			mb.On("GetProjectBuilds", mock.Anything).Return(test.builds, nil)
+			mb.On("GetProjectBuilds", mock.Anything, mock.Anything).Return(test.builds, nil)
 
 			c := controller.NewController(mb)
 			ctx := c.ProjectBuildListPageContext("whatever")
@@ -348,7 +348,7 @@ func TestControllerBuildJobListPageContext(t *testing.T) {
 			// Mocks.
 			mb := &mbrigade.Service{}
 			mb.On("GetBuild", mock.Anything).Return(test.build, nil)
-			mb.On("GetBuildJobs", mock.Anything).Return(test.jobs, nil)
+			mb.On("GetBuildJobs", mock.Anything, mock.Anything).Return(test.jobs, nil)
 
 			c := controller.NewController(mb)
 			ctx := c.BuildJobListPageContext("whatever")
