@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/rivo/tview"
@@ -47,24 +46,13 @@ func (i *Index) createPages() *tview.Pages {
 }
 
 func (i *Index) createLayout() {
-	// Create a top row to show global information.
-	info := tview.NewTextView().
-		SetDynamicColors(true).
-		SetRegions(true).
-		SetWrap(false)
-
 	// Create the pages.
 	pages := i.createPages()
 
 	// Create our layout.
 	i.layout = tview.NewFlex().
 		SetDirection(tview.FlexRow).
-		AddItem(info, 1, 1, false).
 		AddItem(pages, 0, 1, true)
-
-	// Set title.
-	info.SetText(fmt.Sprintf("Welcome to brigadeterm %s", "v0.1.0dev"))
-
 }
 
 // Render satisfies Renderer interface.

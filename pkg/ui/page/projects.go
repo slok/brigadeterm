@@ -78,7 +78,6 @@ func (p *ProjectList) createComponents() {
 		AddItem(p.projectsTable, 0, 1, true)
 }
 
-// FillBrigadeProjectList
 func (p *ProjectList) fill(ctx *controller.ProjectListPageContext) {
 	// Clear other widgets.
 	p.projectsTable.Clear()
