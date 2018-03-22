@@ -106,14 +106,24 @@ func (p *ProjectBuildList) Refresh(projectID string) {
 }
 
 func (p *ProjectBuildList) fill(projectID string, ctx *controller.ProjectBuildListPageContext) {
+	p.fillProjectInformation(ctx)
+	p.fillUsage()
+	p.fillBuildList(projectID, ctx)
+}
+
+func (p *ProjectBuildList) fillProjectInformation(ctx *controller.ProjectBuildListPageContext) {
 	// Fill the project information.
 	p.projectInfo.Clear()
 	p.projectInfo.SetText(fmt.Sprintf(projectInfoFMT, ctx.ProjectName, ctx.ProjectURL, ctx.ProjectNS))
+}
 
+func (p *ProjectBuildList) fillUsage() {
 	// Fill usage (not required).
 	p.usage.Clear()
 	p.usage.SetText(projectBuildListUsage)
+}
 
+func (p *ProjectBuildList) fillBuildList(projectID string, ctx *controller.ProjectBuildListPageContext) {
 	// Fill the build table.
 	p.buildsTable.Clear()
 
