@@ -16,6 +16,15 @@ import (
 	"github.com/slok/brigadeterm/pkg/ui"
 )
 
+const (
+	brigadeVersionFMT = "brigadeterm %s"
+)
+
+var (
+	// Version is the app version.
+	Version = "dev"
+)
+
 // Main is the main package.
 type Main struct {
 	flags *cmdFlags
@@ -30,6 +39,10 @@ func NewMain() *Main {
 
 // Run will run the main application.
 func (m *Main) Run() error {
+	if m.flags.showVersion {
+		m.printVersion()
+		return nil
+	}
 	// Create external dependencies.
 	k8scli, err := m.createKubernetesClients()
 	if err != nil {
@@ -62,6 +75,11 @@ func (m *Main) createKubernetesClients() (kubernetes.Interface, error) {
 // loadKubernetesConfig loads kubernetes configuration based on flags.
 func (m *Main) loadKubernetesConfig() (*rest.Config, error) {
 	return clientcmd.BuildConfigFromFlags("", m.flags.kubeConfig)
+}
+
+// printVersion prints the version of the app.
+func (m *Main) printVersion() {
+	fmt.Fprintf(os.Stdout, brigadeVersionFMT, Version)
 }
 
 func main() {
