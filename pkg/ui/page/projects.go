@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	okSymbol      = "✓"
+	okSymbol      = "✔"
 	failedSymbol  = "✖"
-	runningSymbol = "!"
+	runningSymbol = "⟳"
 )
 
 const (
@@ -123,10 +123,13 @@ func (p *ProjectList) fill(ctx *controller.ProjectListPageContext) {
 
 	// Set selectable to call our jobs.
 	p.projectsTable.SetSelectedFunc(func(row, column int) {
-		// Get project ID cell and from commit the build ID.
-		cell := p.projectsTable.GetCell(row, 1)
-		projectID := projectNameIDIndex[cell.Text]
-		// Load build list page.
-		p.router.LoadProjectBuildList(projectID)
+		// If the row is the header then don't do anything.
+		if row > 0 {
+			// Get project ID cell and from commit the build ID.
+			cell := p.projectsTable.GetCell(row, 1)
+			projectID := projectNameIDIndex[cell.Text]
+			// Load build list page.
+			p.router.LoadProjectBuildList(projectID)
+		}
 	})
 }

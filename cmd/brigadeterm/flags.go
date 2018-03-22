@@ -12,6 +12,7 @@ type cmdFlags struct {
 	fs               *flag.FlagSet
 	kubeConfig       string
 	brigadeNamespace string
+	showVersion      bool
 }
 
 func newCmdFlags() *cmdFlags {
@@ -27,6 +28,7 @@ func (c *cmdFlags) init() {
 	// register flags
 	c.fs.StringVar(&c.kubeConfig, "kubeconfig", kubehome, "kubernetes configuration path, only used when development mode enabled")
 	c.fs.StringVar(&c.brigadeNamespace, "namespace", "", "kubernetes namespace where brigade is running")
+	c.fs.BoolVar(&c.showVersion, "version", false, "show app version")
 
 	// Parse flags
 	c.fs.Parse(os.Args[1:])

@@ -167,9 +167,11 @@ func (p *ProjectBuildList) fillBuildList(projectID string, ctx *controller.Proje
 
 	// Set selectable to call our jobs.
 	p.buildsTable.SetSelectedFunc(func(row, column int) {
-		buildID := p.buildsTable.GetCell(row, 3).Text
-
-		// Load build job list page.
-		p.router.LoadBuildJobList(projectID, buildID)
+		// If the row is the header then don't do anything.
+		if row > 0 {
+			buildID := p.buildsTable.GetCell(row, 3).Text
+			// Load build job list page.
+			p.router.LoadBuildJobList(projectID, buildID)
+		}
 	})
 }

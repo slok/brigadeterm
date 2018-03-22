@@ -227,8 +227,11 @@ func (b *BuildJobList) fillJobsList(projectID, buildID string, ctx *controller.B
 
 	// Set selectable to call our jobs.
 	b.jobsList.SetSelectedFunc(func(row, column int) {
-		jobID := b.jobsList.GetCell(row, 3).Text
-		// Load log page
-		b.router.LoadJobLog(projectID, buildID, jobID)
+		// If the row is the header then don't do anything.
+		if row > 0 {
+			jobID := b.jobsList.GetCell(row, 3).Text
+			// Load log page
+			b.router.LoadJobLog(projectID, buildID, jobID)
+		}
 	})
 }

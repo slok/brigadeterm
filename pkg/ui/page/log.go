@@ -118,6 +118,10 @@ func (j *JobLog) fillUsage() {
 }
 
 func (j *JobLog) fillBuildInfo(ctx *controller.JobLogPageContext) {
+	if ctx.Job == nil { // Safety check.
+		return
+	}
+
 	color := "[white]"
 	j.jobsInfo.SetBorderColor(tcell.ColorWhite)
 	if !ctx.Job.Running {
