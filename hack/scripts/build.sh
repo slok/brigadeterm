@@ -3,31 +3,24 @@
 set -o errexit
 set -o nounset
 
-
 src=./cmd/brigadeterm
 out=./bin/brigadeterm
+
 goarch=amd64
-platform=${1:-linux}
 
-# Select the release type.
-case "${platform}" in
-    "linux" )
-        echo "Building linux release..."
-        goos=linux
-        binary_ext=-linux-amd64
-
-    ;;
-    "darwin" )
-        echo "Building darwin release..."
-        goos=linux
-        binary_ext=-darwin-amd64
-    ;;
-    "windows" )
-        echo "Building windows release..."
-        goos=windows
-        binary_ext=-windows-amd64.exe
-    ;;
-esac
+if [ $ostype == 'Linux' ]; then 
+    echo "Building linux release..."
+    goos=linux
+    binary_ext=-linux-amd64
+elif [ $ostype == 'Darwin' ]; then 
+    echo "Building darwin release..."
+    goos=linux
+    binary_ext=-darwin-amd64
+elif [ $ostype == 'Windows' ]; then 
+    echo "Building windows release..."
+    goos=windows
+    binary_ext=-windows-amd64.exe
+fi
 
 final_out=${out}${binary_ext}
 ldf_cmp="-w -extldflags '-static'"
