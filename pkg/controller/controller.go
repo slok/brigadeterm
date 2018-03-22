@@ -24,15 +24,13 @@ type Controller interface {
 }
 
 type controller struct {
-	brigade    brigade.Service
-	Controller // For the fakes.
+	brigade brigade.Service
 }
 
 // NewController returns a new controller.
 func NewController(brigade brigade.Service) Controller {
 	return &controller{
-		brigade:    brigade,
-		Controller: NewFakeController(),
+		brigade: brigade,
 	}
 }
 
