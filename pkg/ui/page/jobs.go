@@ -19,6 +19,7 @@ const (
 	pipelineBlockString = `█`
 	pipelineStepTotal   = 50
 	pipelineColor       = tcell.ColorYellow
+	pipelineTitle       = "Pipeline timeline (total duration: %s)"
 
 	buildJobListUsage = `[yellow](F5) [white]Reload	[yellow](ESC) [white]Back`
 )
@@ -54,8 +55,8 @@ func (b *BuildJobList) createComponents() {
 	b.jobsPipeline = tview.NewTable().
 		SetBordersColor(pipelineColor)
 	b.jobsPipeline.
-		SetBorder(true).
-		SetTitle("Pipeline timeline")
+		SetTitle(fmt.Sprintf(pipelineTitle, time.Millisecond*0)).
+		SetBorder(true)
 
 	// Create the job layout (jobs + log).
 	b.jobsList = tview.NewTable().
@@ -125,7 +126,7 @@ func (b *BuildJobList) fillPipelineTimeline(ctx *controller.BuildJobListPageCont
 
 	// Get timing information, first job, last job and the total runtime time of the run jobs.
 	first, _, totalDuration := b.getJobTimingData(ctx)
-	stepDuration := int(totalDuration.Seconds()) / pipelineStepTotal
+	stepDuration := int(totalDuration.Nanoseconds()) / pipelineStepTotal
 
 	// If there is no duration then don't fill the pipeline
 	if stepDuration == 0 {
@@ -142,17 +143,20 @@ func (b *BuildJobList) fillPipelineTimeline(ctx *controller.BuildJobListPageCont
 
 		// Get length of pipeline.
 		jobDuration := job.Ended.Sub(job.Started)
-		pipelineLen := int(jobDuration.Seconds()) / stepDuration
+		pipelineLen := int(jobDuration.Nanoseconds()) / stepDuration
 
 		// Get the start point of the job by getting the start point and
 		// calculating the diff until the start of the current job.
 		startOffsetTime := job.Started.Sub(first)
-		startOffset := int(startOffsetTime.Seconds()) / stepDuration
+		startOffset := int(startOffsetTime.Nanoseconds()) / stepDuration
 
 		for j := startOffset; j < startOffset+pipelineLen; j++ {
 			b.jobsPipeline.SetCell(i*rowsBetweenMultiplier, offset+j, &tview.TableCell{Text: pipelineBlockString, BackgroundColor: pipelineColor, Color: pipelineColor})
 		}
 	}
+
+	// Set title name:
+	b.jobsPipeline.SetTitle(fmt.Sprintf(pipelineTitle, totalDuration.Truncate(1*time.Second)))
 }
 
 func (b *BuildJobList) getJobTimingData(ctx *controller.BuildJobListPageContext) (first, last time.Time, totalDuration time.Duration) {
