@@ -23,11 +23,8 @@ type Main struct {
 
 // NewMain returns a new main application.
 func NewMain() *Main {
-	fl := &cmdFlags{}
-	fl.init()
-
 	return &Main{
-		flags: fl,
+		flags: newCmdFlags(),
 	}
 }
 
