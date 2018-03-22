@@ -30,6 +30,7 @@ BUILD_BINARY_CMD := VERSION=${VERSION} ./hack/scripts/build.sh
 BUILD_IMAGE_CMD := IMAGE_VERSION=${VERSION} ./hack/scripts/build-image.sh
 DEP_ENSURE_API_CMD := dep ensure -update github.com/slok/brigadeterm
 DEP_ENSURE_CMD := dep ensure
+CI_RELEASE_CMD := ./hack/scripts/travis-release.sh
 
 # environment dirs
 DEV_DIR := docker/dev
@@ -83,6 +84,10 @@ ci-integration-test:
 	$(INTEGRATION_TEST_CMD)
 .PHONY: ci
 ci: ci-integration-test
+
+.PHONY: ci-release
+ci-release:
+	$(CI_RELEASE_CMD)
 
 # Mocks stuff in dev
 .PHONY: mocks
