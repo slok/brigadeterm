@@ -24,6 +24,10 @@ type Service interface {
 	GetProjectBuilds(project *brigademodel.Project, desc bool) ([]*brigademodel.Build, error)
 	// GetBuildJobs will get all the jobs of a build in descendant or ascendant order.
 	GetBuildJobs(BuildID string, desc bool) ([]*brigademodel.Job, error)
+	// GetJob will get a job.
+	GetJob(jobID string) (*brigademodel.Job, error)
+	// GetJobLog will get a job log.
+	GetJobLog(jobID string) (string, error)
 }
 
 // repository will use kubernetes as repository for the brigade objects.
@@ -134,7 +138,7 @@ func (s *service) GetProjectBuilds(project *brigademodel.Project, desc bool) ([]
 	return res, nil
 }
 
-// GetBuildJobs satisfies Repository interface.
+// GetBuildJobs satisfies Service interface.
 func (s *service) GetBuildJobs(BuildID string, desc bool) ([]*brigademodel.Job, error) {
 	bl, err := s.client.GetBuild(BuildID)
 	if err != nil {
@@ -163,19 +167,28 @@ func (s *service) GetBuildJobs(BuildID string, desc bool) ([]*brigademodel.Job, 
 	return res, nil
 }
 
-// func (r *repository) transformJobStatusToBuildStatus(status brigade.JobStatus) brigademodel.BuildStatus {
-// 	switch status {
-// 	case brigade.JobRunning:
-// 		return brigademodel.BuildStatusRunning
-// 	case brigade.JobSucceeded:
-// 		return brigademodel.BuildStatusSucceeded
-// 	case brigade.JobFailed:
-// 		return brigademodel.BuildStatusFailed
-// 	case brigade.JobUnknown:
-// 		return brigademodel.BuildStatusUnknown
-// 	case brigade.JobPending:
-// 		return brigademodel.BuildStatusPending
-// 	}
+func (s *service) GetJob(jobID string) (*brigademodel.Job, error) {
+	j, err := s.client.GetJob(jobID)
 
-// 	return brigademodel.BuildStatusUnknown
-// }
+	if err != nil {
+		return nil, err
+	}
+	res := brigademodel.Job(*j)
+	return &res, nil
+}
+
+// GetJobLog satisfies Service interface.
+func (s *service) GetJobLog(jobID string) (string, error) {
+	// TODO: Change to stream.
+	job, err := s.client.GetJob(jobID)
+	if err != nil {
+		return "", err
+	}
+
+	str, err := s.client.GetJobLog(job)
+	if err != nil {
+		return "", err
+	}
+
+	return str, nil
+}

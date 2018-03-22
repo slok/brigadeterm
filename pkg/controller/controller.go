@@ -115,11 +115,26 @@ func (c *controller) BuildJobListPageContext(buildID string) *BuildJobListPageCo
 	}
 }
 
-// func (c *controller) JobLogPageContext(jobID string) *JobLogPageContext {
-// 	return &JobLogPageContext{
-// 		Error: fmt.Errorf("not implentented"),
-// 	}
-// }
+func (c *controller) JobLogPageContext(jobID string) *JobLogPageContext {
+	job, err := c.brigade.GetJob(jobID)
+	if err != nil {
+		return &JobLogPageContext{
+			Error: fmt.Errorf("there was an error while getting %s job: %s", jobID, err),
+		}
+	}
+
+	log, err := c.brigade.GetJobLog(jobID)
+	if err != nil {
+		return &JobLogPageContext{
+			Error: fmt.Errorf("there was an error while getting %s job log: %s", jobID, err),
+		}
+	}
+
+	return &JobLogPageContext{
+		Job: c.transformJob(job),
+		Log: []byte(log),
+	}
+}
 
 func (c *controller) transformBuild(b *brigademodel.Build) *Build {
 	var isRunning bool

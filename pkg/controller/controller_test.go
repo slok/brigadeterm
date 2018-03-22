@@ -357,3 +357,56 @@ func TestControllerBuildJobListPageContext(t *testing.T) {
 		})
 	}
 }
+
+func TestControllerJobLogPageContext(t *testing.T) {
+	start := time.Now().Add(-5 * time.Minute)
+	end := time.Now().Add(-4 * time.Minute)
+
+	tests := []struct {
+		name   string
+		job    *brigademodel.Job
+		log    string
+		expCtx *controller.JobLogPageContext
+	}{
+		{
+			name: "job log should return job's log context.",
+			job: &brigademodel.Job{
+				ID:        "j1",
+				Name:      "job-1",
+				Image:     "myimage/image:v0.1.0",
+				Status:    azurebrigade.JobRunning,
+				StartTime: start,
+				EndTime:   end,
+			},
+			log: "my awesome log",
+			expCtx: &controller.JobLogPageContext{
+				Job: &controller.Job{
+					ID:         "j1",
+					Name:       "job-1",
+					Image:      "myimage/image:v0.1.0",
+					Running:    true,
+					FinishedOK: false,
+					Started:    start,
+					Ended:      end,
+				},
+				Log: []byte("my awesome log"),
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert := assert.New(t)
+
+			// Mocks.
+			mb := &mbrigade.Service{}
+			mb.On("GetJob", mock.Anything).Return(test.job, nil)
+			mb.On("GetJobLog", mock.Anything).Return(test.log, nil)
+
+			c := controller.NewController(mb)
+			ctx := c.JobLogPageContext("whatever")
+
+			assert.Equal(test.expCtx, ctx)
+		})
+	}
+}

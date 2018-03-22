@@ -55,6 +55,50 @@ func (_m *Service) GetBuildJobs(BuildID string, desc bool) ([]*brigade.Job, erro
 	return r0, r1
 }
 
+// GetJob provides a mock function with given fields: jobID
+func (_m *Service) GetJob(jobID string) (*brigade.Job, error) {
+	ret := _m.Called(jobID)
+
+	var r0 *brigade.Job
+	if rf, ok := ret.Get(0).(func(string) *brigade.Job); ok {
+		r0 = rf(jobID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*brigade.Job)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(jobID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetJobLog provides a mock function with given fields: jobID
+func (_m *Service) GetJobLog(jobID string) (string, error) {
+	ret := _m.Called(jobID)
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string) string); ok {
+		r0 = rf(jobID)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(jobID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetProject provides a mock function with given fields: projectID
 func (_m *Service) GetProject(projectID string) (*brigade.Project, error) {
 	ret := _m.Called(projectID)

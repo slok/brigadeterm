@@ -16,10 +16,10 @@ const (
 
 const (
 	jobInfoFMT = `
-%[1]sJob: [white]%s
-%[1]sID: [white]%s
-%[1]sStarted: [white]%s
-%[1]sDuration: [white]%v`
+%[1]sJob: [white]%[2]s
+%[1]sID: [white]%[3]s
+%[1]sStarted: [white]%[4]s
+%[1]sDuration: [white]%[5]v`
 	jobLogUsage = `[yellow](F5) [white]Reload	[yellow](ESC) [white]Back`
 )
 
@@ -115,11 +115,16 @@ func (j *JobLog) fillUsage() {
 }
 
 func (j *JobLog) fillBuildInfo(ctx *controller.JobLogPageContext) {
-	color := "[red]"
-	j.jobsInfo.SetBorderColor(tcell.ColorRed)
-	if !ctx.Job.FinishedOK {
-		j.jobsInfo.SetBorderColor(tcell.ColorGreen)
-		color = "[green]"
+	color := "[white]"
+	j.jobsInfo.SetBorderColor(tcell.ColorWhite)
+	if !ctx.Job.Running {
+		if ctx.Job.FinishedOK {
+			j.jobsInfo.SetBorderColor(tcell.ColorGreen)
+			color = "[green]"
+		} else {
+			j.jobsInfo.SetBorderColor(tcell.ColorRed)
+			color = "[red]"
+		}
 	}
 
 	j.jobsInfo.Clear()
