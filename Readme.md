@@ -13,6 +13,12 @@ To build just type:
 make build-binary
 ```
 
+Or use go directly:
+
+```bash
+go get -u github.com/slok/brigadeterm/cmd/brigadeterm/...
+```
+
 ## Run
 
 *At this moment the project is in alpha stage, there are no releases. You can build from source code.*
