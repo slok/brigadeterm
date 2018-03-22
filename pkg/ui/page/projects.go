@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	okSymbol      = "✓"
+	okSymbol      = "✔"
 	failedSymbol  = "✖"
-	runningSymbol = "!"
+	runningSymbol = "⟳"
 )
 
 const (
