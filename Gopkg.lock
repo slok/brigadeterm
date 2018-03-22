@@ -8,8 +8,8 @@
     "pkg/storage",
     "pkg/storage/kube"
   ]
-  revision = "6913b2703df943fed7a135b671f3efdafd92dbf3"
-  version = "v0.10.0"
+  revision = "69ddd4520e2d2964d7cd4709f4bd441214339c9f"
+  version = "v0.12.0"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -415,6 +415,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8c4b6ec7d08ed3011ee4a94a16611a335bea032110aec459e59c4ab1d757642e"
+  inputs-digest = "1000fb3c96c31feb0e38d8554aed9e9abb638ca3bac0181920f5a513b8b64cd5"
   solver-name = "gps-cdcl"
   solver-version = 1
