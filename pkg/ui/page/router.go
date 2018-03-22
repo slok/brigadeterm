@@ -12,7 +12,6 @@ type Router struct {
 	projectBuildListPage *ProjectBuildList
 	buildJobListPage     *BuildJobList
 	jobLogPage           *JobLog
-	aboutPage            *About
 }
 
 // NewRouter returns a new router.
@@ -26,7 +25,6 @@ func NewRouter(controller controller.Controller, pages *tview.Pages) *Router {
 	r.projectBuildListPage = NewProjectBuildList(controller, r)
 	r.buildJobListPage = NewBuildJobList(controller, r)
 	r.jobLogPage = NewJobLog(controller, r)
-	r.aboutPage = NewAbout(r)
 
 	// Register our pages on the app pages container.
 	r.register()
@@ -41,7 +39,6 @@ func (r *Router) register() {
 		r.projectBuildListPage,
 		r.buildJobListPage,
 		r.jobLogPage,
-		r.aboutPage,
 	}
 
 	// Register all the pages on the ui.
@@ -76,11 +73,4 @@ func (r *Router) LoadJobLog(projectID, buildID, jobID string) {
 	r.jobLogPage.BeforeLoad()
 	r.jobLogPage.Refresh(projectID, buildID, jobID)
 	r.pages.SwitchToPage(JobLogPageName)
-}
-
-// LoadAbout will set the ui on the about list
-func (r *Router) LoadAbout() {
-	r.aboutPage.BeforeLoad()
-	r.aboutPage.Refresh()
-	r.pages.SwitchToPage(AboutPageName)
 }
