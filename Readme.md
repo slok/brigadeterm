@@ -1,4 +1,4 @@
-# Brigadeterm
+# Brigadeterm [![Build Status](https://travis-ci.org/slok/brigadeterm.svg?branch=master)](https://travis-ci.org/slok/brigadeterm)
 
 Brigadeterm is a text based dashboard for [Brigade][brigade-url] pipeline system.
 
