@@ -15,6 +15,7 @@ const (
 	okSymbol      = "✔"
 	failedSymbol  = "✖"
 	runningSymbol = "⟳"
+	unknownSymbol = "?"
 )
 
 const (
@@ -95,17 +96,29 @@ func (p *ProjectList) fill(ctx *controller.ProjectListPageContext) {
 	rowPosition := 1
 	for _, project := range ctx.Projects {
 
-		// Select row color and symbol.
-		symbol := runningSymbol
+		var event string
+		var version string
+		var since time.Duration
 		color := tcell.ColorWhite
-		if !project.LastBuild.Running {
-			if project.LastBuild.FinishedOK {
-				symbol = okSymbol
-				color = tcell.ColorGreen
-			} else {
-				symbol = failedSymbol
-				color = tcell.ColorRed
+		symbol := unknownSymbol
+
+		if project.LastBuild != nil {
+			// Select row color and symbol.
+			symbol = runningSymbol
+			if !project.LastBuild.Running {
+				if project.LastBuild.FinishedOK {
+					symbol = okSymbol
+					color = tcell.ColorGreen
+				} else {
+					symbol = failedSymbol
+					color = tcell.ColorRed
+				}
 			}
+
+			// Calculate lastbuild data.
+			event = project.LastBuild.EventType
+			version = project.LastBuild.Version
+			since = time.Since(project.LastBuild.Started).Truncate(time.Second * 1)
 		}
 
 		// Set the index so we can get the project ID on selection.
@@ -113,9 +126,8 @@ func (p *ProjectList) fill(ctx *controller.ProjectListPageContext) {
 
 		p.projectsTable.SetCell(rowPosition, 0, &tview.TableCell{Text: symbol, Align: tview.AlignLeft, Color: color})
 		p.projectsTable.SetCell(rowPosition, 1, &tview.TableCell{Text: project.Name, Align: tview.AlignLeft, Color: color})
-		p.projectsTable.SetCell(rowPosition, 2, &tview.TableCell{Text: project.LastBuild.EventType, Align: tview.AlignLeft, Color: color})
-		p.projectsTable.SetCell(rowPosition, 3, &tview.TableCell{Text: project.LastBuild.Version, Align: tview.AlignLeft, Color: color})
-		since := time.Since(project.LastBuild.Started).Truncate(time.Second * 1)
+		p.projectsTable.SetCell(rowPosition, 2, &tview.TableCell{Text: event, Align: tview.AlignLeft, Color: color})
+		p.projectsTable.SetCell(rowPosition, 3, &tview.TableCell{Text: version, Align: tview.AlignLeft, Color: color})
 		p.projectsTable.SetCell(rowPosition, 4, &tview.TableCell{Text: fmt.Sprintf("%v ago", since), Align: tview.AlignLeft, Color: color})
 
 		rowPosition++
