@@ -14,7 +14,7 @@ if [ $ostype == 'Linux' ]; then
     binary_ext=-linux-amd64
 elif [ $ostype == 'Darwin' ]; then 
     echo "Building darwin release..."
-    goos=linux
+    goos=darwin
     binary_ext=-darwin-amd64
 elif [ $ostype == 'Windows' ]; then 
     echo "Building windows release..."

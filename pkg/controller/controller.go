@@ -44,17 +44,18 @@ func (c *controller) ProjectListPageContext() *ProjectListPageContext {
 
 	ctxPrjs := make([]*Project, len(prjs))
 	for i, prj := range prjs {
+		p := &Project{
+			ID:   prj.ID,
+			Name: prj.Name,
+		}
+		ctxPrjs[i] = p
+
+		// Set last build of the project.
 		lastBuild, err := c.brigade.GetProjectLastBuild(prj.ID)
 		if err != nil {
-			return &ProjectListPageContext{
-				Error: fmt.Errorf("there was an error while getting project %s las build from brigade: %s", prj.ID, err),
-			}
+			continue
 		}
-		ctxPrjs[i] = &Project{
-			ID:        prj.ID,
-			Name:      prj.Name,
-			LastBuild: c.transformBuild(lastBuild),
-		}
+		p.LastBuild = c.transformBuild(lastBuild)
 	}
 
 	return &ProjectListPageContext{
