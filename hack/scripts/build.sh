@@ -20,6 +20,9 @@ elif [ $ostype == 'Windows' ]; then
     echo "Building windows release..."
     goos=windows
     binary_ext=-windows-amd64.exe
+else
+    echo "ostype env var required"
+    exit 1
 fi
 
 final_out=${out}${binary_ext}
