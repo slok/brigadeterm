@@ -19,7 +19,7 @@ case "${platform}" in
     ;;
     "darwin" )
         echo "Building darwin release..."
-        goos=linux
+        goos=darwin
         binary_ext=-darwin-amd64
     ;;
     "windows" )
