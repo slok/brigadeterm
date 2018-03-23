@@ -9,6 +9,9 @@ DOCKER_GO_SERVICE_PATH := /go/src/github.com/slok/brigadeterm
 # Shell to use for running scripts
 SHELL := $(shell which bash)
 
+# Get OS
+OSTYPE := $(shell uname)
+
 # Get docker path or an empty string
 DOCKER := $(shell command -v docker)
 
@@ -25,7 +28,7 @@ VERSION=$(shell git describe --tags --always)
 UNIT_TEST_CMD := ./hack/scripts/unit-test.sh
 INTEGRATION_TEST_CMD := ./hack/scripts/integration-test.sh
 MOCKS_CMD := ./hack/scripts/mockgen.sh
-DOCKER_RUN_CMD := docker run -v ${PWD}:$(DOCKER_GO_SERVICE_PATH) --rm -it $(SERVICE_NAME)
+DOCKER_RUN_CMD := docker run --env ostype=$(OSTYPE) -v ${PWD}:$(DOCKER_GO_SERVICE_PATH) --rm -it $(SERVICE_NAME)
 BUILD_BINARY_CMD := VERSION=${VERSION} ./hack/scripts/build.sh
 BUILD_IMAGE_CMD := IMAGE_VERSION=${VERSION} ./hack/scripts/build-image.sh
 DEP_ENSURE_API_CMD := dep ensure -update github.com/slok/brigadeterm
@@ -34,6 +37,8 @@ CI_RELEASE_CMD := ./hack/scripts/travis-release.sh
 
 # environment dirs
 DEV_DIR := docker/dev
+
+IMAGE := $(shell docker images -q brigadeterm 2> /dev/null)
 
 # The default action of this Makefile is to build the development docker image
 .PHONY: default
@@ -46,19 +51,31 @@ ifndef DOCKER
 	@echo "Docker is not available. Please install docker"
 	@exit 1
 endif
+ifndef IMAGE
+	@echo "Docker Image not available, Building..."
+	docker build -t $(SERVICE_NAME) \
+	--build-arg uid=$(UID) \
+	--build-arg gid=$(GID) \
+	--build-arg ostype=$(OSTYPE) -f ./docker/dev/Dockerfile .
+endif
 
 # Build the development docker image
 .PHONY: build
 build:
-	docker build -t $(SERVICE_NAME) --build-arg uid=$(UID) --build-arg  gid=$(GID) -f ./docker/dev/Dockerfile .
+	docker build -t $(SERVICE_NAME) \
+	--build-arg uid=$(UID) \
+	--build-arg gid=$(GID) \
+	--build-arg ostype=$(OSTYPE) -f ./docker/dev/Dockerfile .
 
 # Shell the development docker image
 .PHONY: build
 shell: build
 	$(DOCKER_RUN_CMD) /bin/bash
 
+
+
 # Build production stuff.
-build-binary:
+build-binary: deps-development
 	$(DOCKER_RUN_CMD) /bin/sh -c '$(BUILD_BINARY_CMD)'
 
 .PHONY: build-image
