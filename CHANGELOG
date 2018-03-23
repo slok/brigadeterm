@@ -1,4 +1,4 @@
-## 0.1.1 / 2018-xx-xx
+## 0.1.1 / 2018-03-23
 
 * [BUGFIX] (UI) Fix not showing any project on project list when one of the projects has 0 builds.
 
