@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -15,21 +16,37 @@ type cmdFlags struct {
 	showVersion      bool
 }
 
-func newCmdFlags() *cmdFlags {
+func newCmdFlags() (*cmdFlags, error) {
 	fls := &cmdFlags{
 		fs: flag.NewFlagSet(os.Args[0], flag.ExitOnError),
 	}
-	fls.init()
-	return fls
+	err := fls.init()
+
+	return fls, err
 }
-func (c *cmdFlags) init() {
+func (c *cmdFlags) init() error {
 	kubehome := filepath.Join(homedir.HomeDir(), ".kube", "config")
 
 	// register flags
 	c.fs.StringVar(&c.kubeConfig, "kubeconfig", kubehome, "kubernetes configuration path, only used when development mode enabled")
-	c.fs.StringVar(&c.brigadeNamespace, "namespace", "", "kubernetes namespace where brigade is running")
+	c.fs.StringVar(&c.brigadeNamespace, "namespace", "default", "kubernetes namespace where brigade is running")
 	c.fs.BoolVar(&c.showVersion, "version", false, "show app version")
 
 	// Parse flags
-	c.fs.Parse(os.Args[1:])
+	if err := c.fs.Parse(os.Args[1:]); err != nil {
+		return err
+	}
+
+	if err := c.validate(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *cmdFlags) validate() error {
+	if c.brigadeNamespace == "" {
+		return fmt.Errorf("namespace is required")
+	}
+	return nil
 }

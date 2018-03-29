@@ -31,10 +31,15 @@ type Main struct {
 }
 
 // NewMain returns a new main application.
-func NewMain() *Main {
-	return &Main{
-		flags: newCmdFlags(),
+func NewMain() (*Main, error) {
+	flags, err := newCmdFlags()
+	if err != nil {
+		return nil, err
 	}
+
+	return &Main{
+		flags: flags,
+	}, nil
 }
 
 // Run will run the main application.
@@ -83,10 +88,18 @@ func (m *Main) printVersion() {
 }
 
 func main() {
-	m := NewMain()
+	m, err := NewMain()
+	if err != nil {
+		exitWithError(err)
+	}
+
 	if err := m.Run(); err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
-		os.Exit(1)
+		exitWithError(err)
 	}
 	os.Exit(0)
+}
+
+func exitWithError(err error) {
+	fmt.Fprintf(os.Stderr, err.Error()+"\n")
+	os.Exit(1)
 }
