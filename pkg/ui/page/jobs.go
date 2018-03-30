@@ -21,7 +21,7 @@ const (
 	pipelineColor       = tcell.ColorYellow
 	pipelineTitle       = "Pipeline timeline (total duration: %s)"
 
-	buildJobListUsage = `[yellow](F5) [white]Reload	[yellow](ESC/Del) [white]Back [yellow](F1) [white]Home	[yellow](ctrl+Q) [white]Quit`
+	buildJobListUsage = `[yellow](F5) [white]Reload    [yellow](ESC/Del) [white]Back    [yellow](F1) [white]Home    [yellow](ctrl+Q) [white]Quit`
 )
 
 // BuildJobList is the page where a build job list will be available.

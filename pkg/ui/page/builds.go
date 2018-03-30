@@ -14,7 +14,7 @@ const (
 	projectInfoFMT = `[yellow]Project: [white]%s
 [yellow]URL: [white]%s
 [yellow]Namespace: [white]%s`
-	projectBuildListUsage = `[yellow](F5) [white]Reload	[yellow](ESC/Del) [white]Back [yellow](F1) [white]Home	[yellow](ctrl+Q) [white]Quit`
+	projectBuildListUsage = `[yellow](F5) [white]Reload    [yellow](ESC/Del) [white]Back    [yellow](F1) [white]Home    [yellow](ctrl+Q) [white]Quit`
 )
 
 const (

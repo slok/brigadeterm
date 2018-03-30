@@ -20,7 +20,7 @@ const (
 %[1]sID: [white]%[3]s
 %[1]sStarted: [white]%[4]s
 %[1]sDuration: [white]%[5]v`
-	jobLogUsage = `[yellow](F5) [white]Reload	[yellow](ESC/Del) [white]Back [yellow](F1) [white]Home	[yellow](ctrl+Q) [white]Quit`
+	jobLogUsage = `[yellow](F5) [white]Reload    [yellow](ESC/Del) [white]Back    [yellow](F1) [white]Home    [yellow](ctrl+Q) [white]Quit`
 )
 
 // JobLog is the page where a build job log will be available.

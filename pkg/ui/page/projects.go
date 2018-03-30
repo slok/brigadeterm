@@ -14,6 +14,8 @@ import (
 const (
 	// ProjectListPageName is the name that identifies thi projectList page.
 	ProjectListPageName = "projectlist"
+
+	projectListUsage = `[yellow](F5) [white]Reload    [yellow](ctrl+Q) [white]Quit`
 )
 
 // ProjectList is the main page where the project list will be available.
@@ -26,6 +28,7 @@ type ProjectList struct {
 
 	// components
 	projectsTable *tview.Table
+	usage         *tview.TextView
 
 	registerPageOnce sync.Once
 }
@@ -56,6 +59,19 @@ func (p *ProjectList) Refresh() {
 	ctx := p.controller.ProjectListPageContext()
 	// TODO: check error.
 	p.fill(ctx)
+
+	// Set key handlers.
+	p.projectsTable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Key() {
+		case tcell.KeyF5:
+			// Reload.
+			p.router.LoadProjectList()
+		case tcell.KeyCtrlQ:
+			p.router.Exit()
+		}
+		return event
+	})
+
 }
 
 // createComponents will create all the layout components.
@@ -67,12 +83,28 @@ func (p *ProjectList) createComponents() {
 		SetBorder(true).
 		SetTitle("Projects")
 
+	// Usage.
+	p.usage = tview.NewTextView().
+		SetDynamicColors(true)
+
 	// Create the layout.
 	p.layout = tview.NewFlex().
-		AddItem(p.projectsTable, 0, 1, true)
+		SetDirection(tview.FlexRow).
+		AddItem(p.projectsTable, 0, 1, true).
+		AddItem(p.usage, 1, 1, false)
 }
 
 func (p *ProjectList) fill(ctx *controller.ProjectListPageContext) {
+	p.fillUsage()
+	p.fillProjectList(ctx)
+}
+
+func (p *ProjectList) fillUsage() {
+	p.usage.Clear()
+	p.usage.SetText(projectListUsage)
+}
+
+func (p *ProjectList) fillProjectList(ctx *controller.ProjectListPageContext) {
 	// Clear other widgets.
 	p.projectsTable.Clear()
 
