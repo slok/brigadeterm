@@ -12,12 +12,14 @@ type Router struct {
 	projectBuildListPage *ProjectBuildList
 	buildJobListPage     *BuildJobList
 	jobLogPage           *JobLog
+	app                  *tview.Application
 }
 
 // NewRouter returns a new router.
-func NewRouter(controller controller.Controller, pages *tview.Pages) *Router {
+func NewRouter(app *tview.Application, controller controller.Controller, pages *tview.Pages) *Router {
 	r := &Router{
 		pages: pages,
+		app:   app,
 	}
 
 	// Create the pages.
@@ -73,4 +75,9 @@ func (r *Router) LoadJobLog(projectID, buildID, jobID string) {
 	r.jobLogPage.BeforeLoad()
 	r.jobLogPage.Refresh(projectID, buildID, jobID)
 	r.pages.SwitchToPage(JobLogPageName)
+}
+
+// Exit will terminate everything.
+func (r *Router) Exit() {
+	r.app.Stop()
 }
