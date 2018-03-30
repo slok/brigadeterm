@@ -20,7 +20,7 @@ const (
 %[1]sID: [white]%[3]s
 %[1]sStarted: [white]%[4]s
 %[1]sDuration: [white]%[5]v`
-	jobLogUsage = `[yellow](F5) [white]Reload    [yellow](ESC/Del) [white]Back    [yellow](F1) [white]Home    [yellow](ctrl+Q) [white]Quit`
+	jobLogUsage = `[yellow](F5) [white]Reload    [yellow](<-/Del) [white]Back    [yellow](ESC) [white]Home    [yellow](ctrl+Q) [white]Quit`
 )
 
 // JobLog is the page where a build job log will be available.
@@ -95,10 +95,10 @@ func (j *JobLog) Refresh(projectID, buildID, jobID string) {
 		case tcell.KeyF5:
 			// Reload.
 			j.router.LoadJobLog(projectID, buildID, jobID)
-		case tcell.KeyEsc, tcell.KeyDelete:
+		case tcell.KeyLeft, tcell.KeyDelete:
 			// Back.
 			j.router.LoadBuildJobList(projectID, buildID)
-		case tcell.KeyF1:
+		case tcell.KeyEsc:
 			// Home.
 			j.router.LoadProjectList()
 		case tcell.KeyCtrlQ:

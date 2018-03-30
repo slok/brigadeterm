@@ -14,7 +14,7 @@ const (
 	projectInfoFMT = `[yellow]Project: [white]%s
 [yellow]URL: [white]%s
 [yellow]Namespace: [white]%s`
-	projectBuildListUsage = `[yellow](F5) [white]Reload    [yellow](ESC/Del) [white]Back    [yellow](F1) [white]Home    [yellow](ctrl+Q) [white]Quit`
+	projectBuildListUsage = `[yellow](F5) [white]Reload    [yellow](<-/Del) [white]Back    [yellow](ESC) [white]Home    [yellow](ctrl+Q) [white]Quit`
 )
 
 const (
@@ -96,7 +96,7 @@ func (p *ProjectBuildList) Refresh(projectID string) {
 		case tcell.KeyF5:
 			// Reload.
 			p.router.LoadProjectBuildList(projectID)
-		case tcell.KeyEsc, tcell.KeyDelete, tcell.KeyF1:
+		case tcell.KeyLeft, tcell.KeyDelete, tcell.KeyEsc:
 			// Back.
 			p.router.LoadProjectList()
 		case tcell.KeyCtrlQ:
