@@ -138,29 +138,25 @@ func (p *ProjectBuildList) fillBuildList(projectID string, ctx *controller.Proje
 	// TODO order by time.
 	rowPosition := 1
 	for _, build := range ctx.Builds {
+		icon := unknownIcon
+		color := unknownColor
 
-		// Select row color and symbol.
-		symbol := runningSymbol
-		color := tcell.ColorWhite
-		if !build.Running {
-			if build.FinishedOK {
-				color = tcell.ColorGreen
-				symbol = okSymbol
-			} else {
-				color = tcell.ColorRed
-				symbol = failedSymbol
+		if build != nil {
+			// Select row color and symbol.
+			icon = getIconFromState(build.State)
+			color = getColorFromState(build.State)
+
+			// Fill table.
+			p.buildsTable.SetCell(rowPosition, 0, &tview.TableCell{Text: icon, Align: tview.AlignLeft, Color: color})
+			p.buildsTable.SetCell(rowPosition, 1, &tview.TableCell{Text: build.EventType, Align: tview.AlignLeft, Color: color})
+			p.buildsTable.SetCell(rowPosition, 2, &tview.TableCell{Text: build.Version, Align: tview.AlignLeft, Color: color})
+			p.buildsTable.SetCell(rowPosition, 3, &tview.TableCell{Text: build.ID, Align: tview.AlignLeft, Color: color})
+			if hasFinished(build.State) {
+				timeAgo := time.Since(build.Ended).Truncate(time.Second * 1)
+				p.buildsTable.SetCell(rowPosition, 4, &tview.TableCell{Text: fmt.Sprintf("%v ago", timeAgo), Align: tview.AlignLeft, Color: color})
+				duration := build.Ended.Sub(build.Started).Truncate(time.Second * 1)
+				p.buildsTable.SetCell(rowPosition, 5, &tview.TableCell{Text: fmt.Sprintf("%v", duration), Align: tview.AlignLeft, Color: color})
 			}
-		}
-		// Fill table.
-		p.buildsTable.SetCell(rowPosition, 0, &tview.TableCell{Text: symbol, Align: tview.AlignLeft, Color: color})
-		p.buildsTable.SetCell(rowPosition, 1, &tview.TableCell{Text: build.EventType, Align: tview.AlignLeft, Color: color})
-		p.buildsTable.SetCell(rowPosition, 2, &tview.TableCell{Text: build.Version, Align: tview.AlignLeft, Color: color})
-		p.buildsTable.SetCell(rowPosition, 3, &tview.TableCell{Text: build.ID, Align: tview.AlignLeft, Color: color})
-		if !build.Running {
-			timeAgo := time.Since(build.Ended).Truncate(time.Second * 1)
-			p.buildsTable.SetCell(rowPosition, 4, &tview.TableCell{Text: fmt.Sprintf("%v ago", timeAgo), Align: tview.AlignLeft, Color: color})
-			duration := build.Ended.Sub(build.Started).Truncate(time.Second * 1)
-			p.buildsTable.SetCell(rowPosition, 5, &tview.TableCell{Text: fmt.Sprintf("%v", duration), Align: tview.AlignLeft, Color: color})
 		}
 		rowPosition++
 	}

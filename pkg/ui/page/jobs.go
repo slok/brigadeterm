@@ -141,6 +141,10 @@ func (b *BuildJobList) fillPipelineTimeline(ctx *controller.BuildJobListPageCont
 
 	// Create one row for each job.
 	for i, job := range ctx.Jobs {
+		if job == nil {
+			continue
+		}
+
 		// Name of job.
 		b.jobsPipeline.SetCell(i*rowsBetweenMultiplier, 0, &tview.TableCell{Text: job.Name, Align: tview.AlignLeft, Color: pipelineColor})
 
@@ -170,8 +174,12 @@ func (b *BuildJobList) getJobTimingData(ctx *controller.BuildJobListPageContext)
 	last = ctx.Jobs[0].Ended
 
 	for _, job := range ctx.Jobs[1:] {
+		if job == nil {
+			continue
+		}
+
 		// If running is not count.
-		if job.Running {
+		if !hasFinished(job.State) {
 			continue
 		}
 		if job.Started.Before(first) {
@@ -199,28 +207,25 @@ func (b *BuildJobList) fillJobsList(projectID, buildID string, ctx *controller.B
 	// TODO order by time.
 	rowPosition := 1
 	for _, job := range ctx.Jobs {
-		// Select row color and symbol.
-		symbol := runningSymbol
-		color := tcell.ColorWhite
-		if !job.Running {
-			if job.FinishedOK {
-				symbol = okSymbol
-				color = tcell.ColorGreen
-			} else {
-				symbol = failedSymbol
-				color = tcell.ColorRed
+
+		icon := unknownIcon
+		color := unknownColor
+		if job != nil {
+			// Select row color and symbol.
+			icon = getIconFromState(job.State)
+			color = getColorFromState(job.State)
+
+			// Fill table.
+			b.jobsList.SetCell(rowPosition, 0, &tview.TableCell{Text: icon, Align: tview.AlignLeft, Color: color})
+			b.jobsList.SetCell(rowPosition, 1, &tview.TableCell{Text: job.Name, Align: tview.AlignLeft, Color: color})
+			b.jobsList.SetCell(rowPosition, 2, &tview.TableCell{Text: job.Image, Align: tview.AlignLeft, Color: color})
+			b.jobsList.SetCell(rowPosition, 3, &tview.TableCell{Text: job.ID, Align: tview.AlignLeft, Color: color})
+			if hasFinished(job.State) {
+				timeAgo := time.Since(job.Ended).Truncate(time.Second * 1)
+				b.jobsList.SetCell(rowPosition, 4, &tview.TableCell{Text: fmt.Sprintf("%v ago", timeAgo), Align: tview.AlignLeft, Color: color})
+				duration := job.Ended.Sub(job.Started).Truncate(time.Second * 1)
+				b.jobsList.SetCell(rowPosition, 5, &tview.TableCell{Text: fmt.Sprintf("%v", duration), Align: tview.AlignLeft, Color: color})
 			}
-		}
-		// Fill table.
-		b.jobsList.SetCell(rowPosition, 0, &tview.TableCell{Text: symbol, Align: tview.AlignLeft, Color: color})
-		b.jobsList.SetCell(rowPosition, 1, &tview.TableCell{Text: job.Name, Align: tview.AlignLeft, Color: color})
-		b.jobsList.SetCell(rowPosition, 2, &tview.TableCell{Text: job.Image, Align: tview.AlignLeft, Color: color})
-		b.jobsList.SetCell(rowPosition, 3, &tview.TableCell{Text: job.ID, Align: tview.AlignLeft, Color: color})
-		if !job.Running {
-			timeAgo := time.Since(job.Ended).Truncate(time.Second * 1)
-			b.jobsList.SetCell(rowPosition, 4, &tview.TableCell{Text: fmt.Sprintf("%v ago", timeAgo), Align: tview.AlignLeft, Color: color})
-			duration := job.Ended.Sub(job.Started).Truncate(time.Second * 1)
-			b.jobsList.SetCell(rowPosition, 5, &tview.TableCell{Text: fmt.Sprintf("%v", duration), Align: tview.AlignLeft, Color: color})
 		}
 		rowPosition++
 	}
