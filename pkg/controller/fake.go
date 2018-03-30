@@ -5,6 +5,10 @@ import (
 	"time"
 )
 
+var (
+	staticNow = time.Now()
+)
+
 type fake struct{}
 
 // NewFakeController returns a new faked controller.
@@ -23,7 +27,7 @@ func (f *fake) ProjectListPageContext() *ProjectListPageContext {
 					Version:   "3140d400028b44f9f21f597b0c4d61f537fc51fc",
 					State:     SuccessedState,
 					EventType: "github:push",
-					Started:   time.Now().Add(-9999 * time.Hour),
+					Started:   staticNow.Add(-9999 * time.Hour),
 					Ended:     time.Now().Add(-9998 * time.Hour),
 				},
 			},
@@ -35,7 +39,7 @@ func (f *fake) ProjectListPageContext() *ProjectListPageContext {
 					Version:   "1f537fc5c1f028b44f9f274d3140d40061f59b0c",
 					State:     SuccessedState,
 					EventType: "deploy",
-					Started:   time.Now().Add(-1 * time.Hour),
+					Started:   staticNow.Add(-1 * time.Hour),
 					Ended:     time.Now().Add(-50 * time.Minute),
 				},
 			},
@@ -47,7 +51,7 @@ func (f *fake) ProjectListPageContext() *ProjectListPageContext {
 					Version:   "b44f9f21f59b7161f537fc5cf0280c4d3140d400",
 					State:     FailedState,
 					EventType: "github:push",
-					Started:   time.Now().Add(-120 * time.Hour).Add(-19 * time.Minute),
+					Started:   staticNow.Add(-120 * time.Hour).Add(-19 * time.Minute),
 					Ended:     time.Now().Add(-120 * time.Hour).Add(-18 * time.Minute),
 				},
 			},
@@ -59,7 +63,7 @@ func (f *fake) ProjectListPageContext() *ProjectListPageContext {
 					Version:   "061f537fc5c71f0d3140d4028b44f9f21f59b0c4",
 					State:     PendingState,
 					EventType: "github:push",
-					Started:   time.Now().Add(-5 * time.Minute),
+					Started:   staticNow.Add(-5 * time.Minute),
 					Ended:     time.Now().Add(-128 * time.Second),
 				},
 			},
@@ -82,7 +86,7 @@ func (f *fake) ProjectListPageContext() *ProjectListPageContext {
 					Version:   "1f537fc5c1f028b44f9f274d3140d40061f59b0c",
 					State:     SuccessedState,
 					EventType: "deploy",
-					Started:   time.Now().Add(-1 * time.Hour),
+					Started:   staticNow.Add(-1 * time.Hour),
 					Ended:     time.Now().Add(-50 * time.Minute),
 				},
 			},
@@ -94,7 +98,7 @@ func (f *fake) ProjectListPageContext() *ProjectListPageContext {
 					Version:   "b44f9f21f59b7161f537fc5cf0280c4d3140d400",
 					State:     UnknownState,
 					EventType: "github:push",
-					Started:   time.Now().Add(-120 * time.Hour).Add(-19 * time.Minute),
+					Started:   staticNow.Add(-120 * time.Hour).Add(-19 * time.Minute),
 					Ended:     time.Now().Add(-120 * time.Hour).Add(-18 * time.Minute),
 				},
 			},
@@ -106,7 +110,7 @@ func (f *fake) ProjectListPageContext() *ProjectListPageContext {
 					Version:   "061f537fc5c71f0d3140d4028b44f9f21f59b0c4",
 					State:     SuccessedState,
 					EventType: "github:push",
-					Started:   time.Now().Add(-5 * time.Minute),
+					Started:   staticNow.Add(-5 * time.Minute),
 					Ended:     time.Now().Add(-128 * time.Second),
 				},
 			},
@@ -130,7 +134,7 @@ func (f *fake) ProjectBuildListPageContext(projectID string) *ProjectBuildListPa
 				Version:   "3140d400028b44f9f21f597b0c4d61f537fc51fc",
 				State:     SuccessedState,
 				EventType: "github:push",
-				Started:   time.Now().Add(-9999 * time.Hour),
+				Started:   staticNow.Add(-9999 * time.Hour),
 				Ended:     time.Now().Add(-9998 * time.Hour),
 			},
 			&Build{
@@ -138,7 +142,7 @@ func (f *fake) ProjectBuildListPageContext(projectID string) *ProjectBuildListPa
 				Version:   "1f537fc5c1f028b44f9f274d3140d40061f59b0c",
 				State:     FailedState,
 				EventType: "deploy",
-				Started:   time.Now().Add(-1 * time.Hour),
+				Started:   staticNow.Add(-1 * time.Hour),
 				Ended:     time.Now().Add(-50 * time.Minute),
 			},
 			&Build{
@@ -146,7 +150,7 @@ func (f *fake) ProjectBuildListPageContext(projectID string) *ProjectBuildListPa
 				Version:   "b44f9f21f59b7161f537fc5cf0280c4d3140d400",
 				State:     PendingState,
 				EventType: "github:push",
-				Started:   time.Now().Add(-120 * time.Hour).Add(-19 * time.Minute),
+				Started:   staticNow.Add(-120 * time.Hour).Add(-19 * time.Minute),
 				Ended:     time.Now().Add(-120 * time.Hour).Add(-18 * time.Minute),
 			},
 			&Build{
@@ -154,7 +158,7 @@ func (f *fake) ProjectBuildListPageContext(projectID string) *ProjectBuildListPa
 				Version:   "061f537fc5c71f0d3140d4028b44f9f21f59b0c4",
 				State:     UnknownState,
 				EventType: "github:push",
-				Started:   time.Now().Add(-5 * time.Minute),
+				Started:   staticNow.Add(-5 * time.Minute),
 				Ended:     time.Now().Add(-128 * time.Second),
 			},
 			&Build{
@@ -162,7 +166,7 @@ func (f *fake) ProjectBuildListPageContext(projectID string) *ProjectBuildListPa
 				Version:   "244f9f0d40537fc5c1f59061fb0c4d31471f028b",
 				State:     RunningState,
 				EventType: "github:pull_reqest",
-				Started:   time.Now().Add(-30 * time.Second),
+				Started:   staticNow.Add(-30 * time.Second),
 			},
 			&Build{},
 			nil,
@@ -186,7 +190,7 @@ func (f *fake) BuildJobListPageContext(buildID string) *BuildJobListPageContext 
 				Name:    "unit-test",
 				Image:   "golang:1.9",
 				State:   FailedState,
-				Started: time.Now().Add(-11 * time.Minute),
+				Started: staticNow.Add(-11 * time.Minute),
 				Ended:   time.Now().Add(-9 * time.Minute),
 			},
 			&Job{
@@ -194,7 +198,7 @@ func (f *fake) BuildJobListPageContext(buildID string) *BuildJobListPageContext 
 				Name:    "build-binary-1",
 				Image:   "docker:stable-dind",
 				State:   RunningState,
-				Started: time.Now().Add(-9 * time.Minute),
+				Started: staticNow.Add(-9 * time.Minute),
 				Ended:   time.Now().Add(-5 * time.Minute),
 			},
 			&Job{
@@ -202,7 +206,7 @@ func (f *fake) BuildJobListPageContext(buildID string) *BuildJobListPageContext 
 				Name:    "build-binary-2",
 				Image:   "docker:stable-dind",
 				State:   PendingState,
-				Started: time.Now().Add(-9 * time.Minute),
+				Started: staticNow.Add(-9 * time.Minute),
 				Ended:   time.Now().Add(-5 * time.Minute),
 			},
 			&Job{
@@ -210,7 +214,7 @@ func (f *fake) BuildJobListPageContext(buildID string) *BuildJobListPageContext 
 				Name:    "build-binary-3",
 				Image:   "docker:stable-dind",
 				State:   UnknownState,
-				Started: time.Now().Add(-9 * time.Minute),
+				Started: staticNow.Add(-9 * time.Minute),
 				Ended:   time.Now().Add(-3 * time.Minute),
 			},
 			&Job{
@@ -218,7 +222,7 @@ func (f *fake) BuildJobListPageContext(buildID string) *BuildJobListPageContext 
 				Name:    "set-github-build-status",
 				Image:   "technosophos/github-notify:latest",
 				State:   RunningState,
-				Started: time.Now().Add(-3 * time.Minute),
+				Started: staticNow.Add(-3 * time.Minute),
 				Ended:   time.Now().Add(-1 * time.Minute),
 			},
 			nil,
@@ -233,7 +237,7 @@ func (f *fake) JobLogPageContext(jobID string) *JobLogPageContext {
 			Name:    "build-binary-3",
 			Image:   "docker:stable-dind",
 			State:   SuccessedState,
-			Started: time.Now().Add(-9 * time.Minute),
+			Started: staticNow.Add(-9 * time.Minute),
 			Ended:   time.Now().Add(-3 * time.Minute),
 		},
 		Log: []byte(fmt.Sprintf(`
