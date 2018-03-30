@@ -1,5 +1,7 @@
 ## 0.x.x / 2018-xx-xx
 
+* [FEATURE] (UI) Allow reloading projects on home window (project list).
+* [FEATURE] (UI) Add exit/quit key combination.
 * [FEATURE] (UI) Different colors and icons to states of jobs, builds, projects.
 * [FEATURE] (Brigade) Add pending and unknown states.
 * [BUGFIX]  (k8s) When no namespace is specified use default namespace.

@@ -40,7 +40,7 @@ func (i *Index) createPages() *tview.Pages {
 	pages := tview.NewPages()
 
 	// Create the page router (also creates and registers the pages on the page ui container).
-	i.router = page.NewRouter(i.controller, pages)
+	i.router = page.NewRouter(i.app, i.controller, pages)
 
 	return pages
 }
