@@ -12,3 +12,6 @@ type Build = brigade.Build
 
 // Job is a brigade job.
 type Job = brigade.Job
+
+// State is a jobStatus state.
+type State = brigade.JobStatus

@@ -4,6 +4,22 @@ import (
 	"time"
 )
 
+// State is the state a build, project or job could be.
+type State int
+
+const (
+	// UnknownState is in unknown state.
+	UnknownState State = iota
+	// PendingState is pending, didn't start.
+	PendingState
+	// RunningState has started and is running.
+	RunningState
+	// FailedState has finished and has failed.
+	FailedState
+	// SuccessedState has finished and has completed successfuly.
+	SuccessedState
+)
+
 // Project represents a Brigade project.
 type Project struct {
 	Name      string
@@ -20,13 +36,12 @@ type ProjectListPageContext struct {
 
 // Build is a project build.
 type Build struct {
-	ID         string
-	Version    string
-	Running    bool
-	FinishedOK bool
-	EventType  string
-	Started    time.Time
-	Ended      time.Time
+	ID        string
+	Version   string
+	State     State
+	EventType string
+	Started   time.Time
+	Ended     time.Time
 }
 
 // ProjectBuildListPageContext has the required information to
@@ -42,13 +57,12 @@ type ProjectBuildListPageContext struct {
 
 // Job is a build job.
 type Job struct {
-	ID         string
-	Name       string
-	Image      string
-	Running    bool
-	FinishedOK bool
-	Started    time.Time
-	Ended      time.Time
+	ID      string
+	Name    string
+	Image   string
+	State   State
+	Started time.Time
+	Ended   time.Time
 }
 
 // BuildJobListPageContext has the required information to

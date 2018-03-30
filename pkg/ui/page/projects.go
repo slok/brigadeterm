@@ -12,13 +12,6 @@ import (
 )
 
 const (
-	okSymbol      = "✔"
-	failedSymbol  = "✖"
-	runningSymbol = "⟳"
-	unknownSymbol = "?"
-)
-
-const (
 	// ProjectListPageName is the name that identifies thi projectList page.
 	ProjectListPageName = "projectlist"
 )
@@ -95,25 +88,19 @@ func (p *ProjectList) fill(ctx *controller.ProjectListPageContext) {
 	// Set body.
 	rowPosition := 1
 	for _, project := range ctx.Projects {
+		if project == nil {
+			continue
+		}
 
 		var event string
 		var version string
 		var since time.Duration
-		color := tcell.ColorWhite
-		symbol := unknownSymbol
+		color := unknownColor
+		icon := unknownIcon
 
 		if project.LastBuild != nil {
-			// Select row color and symbol.
-			symbol = runningSymbol
-			if !project.LastBuild.Running {
-				if project.LastBuild.FinishedOK {
-					symbol = okSymbol
-					color = tcell.ColorGreen
-				} else {
-					symbol = failedSymbol
-					color = tcell.ColorRed
-				}
-			}
+			color = getColorFromState(project.LastBuild.State)
+			icon = getIconFromState(project.LastBuild.State)
 
 			// Calculate lastbuild data.
 			event = project.LastBuild.EventType
@@ -124,7 +111,7 @@ func (p *ProjectList) fill(ctx *controller.ProjectListPageContext) {
 		// Set the index so we can get the project ID on selection.
 		projectNameIDIndex[project.Name] = project.ID
 
-		p.projectsTable.SetCell(rowPosition, 0, &tview.TableCell{Text: symbol, Align: tview.AlignLeft, Color: color})
+		p.projectsTable.SetCell(rowPosition, 0, &tview.TableCell{Text: icon, Align: tview.AlignLeft, Color: color})
 		p.projectsTable.SetCell(rowPosition, 1, &tview.TableCell{Text: project.Name, Align: tview.AlignLeft, Color: color})
 		p.projectsTable.SetCell(rowPosition, 2, &tview.TableCell{Text: event, Align: tview.AlignLeft, Color: color})
 		p.projectsTable.SetCell(rowPosition, 3, &tview.TableCell{Text: version, Align: tview.AlignLeft, Color: color})

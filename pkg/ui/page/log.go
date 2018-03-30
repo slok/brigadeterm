@@ -122,21 +122,13 @@ func (j *JobLog) fillBuildInfo(ctx *controller.JobLogPageContext) {
 		return
 	}
 
-	color := "[white]"
-	j.jobsInfo.SetBorderColor(tcell.ColorWhite)
-	if !ctx.Job.Running {
-		if ctx.Job.FinishedOK {
-			j.jobsInfo.SetBorderColor(tcell.ColorGreen)
-			color = "[green]"
-		} else {
-			j.jobsInfo.SetBorderColor(tcell.ColorRed)
-			color = "[red]"
-		}
-	}
+	color := getColorFromState(ctx.Job.State)
+	textColor := getTextColorFromState(ctx.Job.State)
+	j.jobsInfo.SetBorderColor(color)
 
 	j.jobsInfo.Clear()
 	info := fmt.Sprintf(jobInfoFMT,
-		color,
+		textColor,
 		ctx.Job.Name,
 		ctx.Job.ID,
 		ctx.Job.Started,

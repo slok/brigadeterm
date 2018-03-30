@@ -136,51 +136,49 @@ func (c *controller) JobLogPageContext(jobID string) *JobLogPageContext {
 }
 
 func (c *controller) transformBuild(b *brigademodel.Build) *Build {
-	var isRunning bool
-	var ok bool
 	var start time.Time
 	var end time.Time
+	var state = UnknownState
 
 	if b.Worker != nil {
 		start = b.Worker.StartTime
 		end = b.Worker.EndTime
-
-		switch b.Worker.Status {
-		case azurebrigade.JobRunning, azurebrigade.JobPending:
-			isRunning = true
-		case azurebrigade.JobSucceeded:
-			ok = true
-		}
+		state = c.transformState(b.Worker.Status)
 	}
 
 	return &Build{
-		ID:         b.ID,
-		Version:    b.Revision.Commit,
-		Running:    isRunning,
-		FinishedOK: ok,
-		EventType:  b.Type,
-		Started:    start,
-		Ended:      end,
+		ID:        b.ID,
+		Version:   b.Revision.Commit,
+		State:     state,
+		EventType: b.Type,
+		Started:   start,
+		Ended:     end,
 	}
 }
 
 func (c *controller) transformJob(j *brigademodel.Job) *Job {
-	isRunning := false
-	ok := false
-	switch j.Status {
-	case azurebrigade.JobRunning, azurebrigade.JobPending:
-		isRunning = true
-	case azurebrigade.JobSucceeded:
-		ok = true
-	}
 
 	return &Job{
-		ID:         j.ID,
-		Name:       j.Name,
-		Image:      j.Image,
-		Running:    isRunning,
-		FinishedOK: ok,
-		Started:    j.StartTime,
-		Ended:      j.EndTime,
+		ID:      j.ID,
+		Name:    j.Name,
+		Image:   j.Image,
+		State:   c.transformState(j.Status),
+		Started: j.StartTime,
+		Ended:   j.EndTime,
+	}
+}
+
+func (c *controller) transformState(st brigademodel.State) State {
+	switch st {
+	case azurebrigade.JobPending:
+		return PendingState
+	case azurebrigade.JobRunning:
+		return RunningState
+	case azurebrigade.JobSucceeded:
+		return SuccessedState
+	case azurebrigade.JobFailed:
+		return FailedState
+	default:
+		return UnknownState
 	}
 }
