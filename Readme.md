@@ -2,6 +2,7 @@
 
 Brigadeterm is a text based dashboard for [Brigade][brigade-url] pipeline system.
 
+![projects](screenshots/brigadeterm-latest-builds.gif)
 ![pipelines](screenshots/jobs2.png)
 ![builds](screenshots/builds.png)
 
@@ -41,4 +42,4 @@ go get -u github.com/slok/brigadeterm/cmd/brigadeterm/...
 [Here](screenshots) you have some screenshots.
 
 [brigade-url]: https://brigade.sh
-[releases-url]: https://github.com/slok/brigadeterm/releases
+[releases-url]: https://github.com/slok/brigadeterm/releases/latest
