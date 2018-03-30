@@ -22,9 +22,9 @@ const (
 
 // Project represents a Brigade project.
 type Project struct {
-	Name      string
-	ID        string
-	LastBuild *Build
+	Name       string
+	ID         string
+	LastBuilds []*Build
 }
 
 // ProjectListPageContext has the required information to

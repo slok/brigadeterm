@@ -14,8 +14,8 @@ import (
 type Service interface {
 	// GetProjectBuilds will get one project.
 	GetProject(projectID string) (*brigademodel.Project, error)
-	// GetProjectLastBuild will get projects last build.
-	GetProjectLastBuild(projectID string) (*brigademodel.Build, error)
+	// GetProjectLastBuild will get projects last builds.
+	GetProjectLastBuilds(projectID string, quantity int) ([]*brigademodel.Build, error)
 	// GetProjects will get all the projects that are on brigade.
 	GetProjects() ([]*brigademodel.Project, error)
 	// GetBuild will get one build.
@@ -52,7 +52,7 @@ func (s *service) GetProject(projectID string) (*brigademodel.Project, error) {
 	return &res, nil
 }
 
-func (s *service) GetProjectLastBuild(projectID string) (*brigademodel.Build, error) {
+func (s *service) GetProjectLastBuilds(projectID string, quantity int) ([]*brigademodel.Build, error) {
 	prj, err := s.client.GetProject(projectID)
 
 	if err != nil {
@@ -69,8 +69,17 @@ func (s *service) GetProjectLastBuild(projectID string) (*brigademodel.Build, er
 	}
 
 	// Get last one.
-	lastBuild := brigademodel.Build(*builds[0])
-	return &lastBuild, nil
+	if len(builds) > quantity {
+		builds = builds[:quantity]
+	}
+	lastBuilds := make([]*brigademodel.Build, len(builds))
+
+	for i, b := range builds {
+		lb := brigademodel.Build(*b)
+		lastBuilds[i] = &lb
+	}
+
+	return lastBuilds, nil
 }
 
 // GetProjects satisfies Service interface.

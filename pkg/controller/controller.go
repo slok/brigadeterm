@@ -10,6 +10,10 @@ import (
 	"github.com/slok/brigadeterm/pkg/service/brigade"
 )
 
+const (
+	projectLastBuildsQuantity = 5
+)
+
 // Controller knows what to how to handle the different ui views data
 // using the required services and having the logic of each part.
 type Controller interface {
@@ -51,11 +55,16 @@ func (c *controller) ProjectListPageContext() *ProjectListPageContext {
 		ctxPrjs[i] = p
 
 		// Set last build of the project.
-		lastBuild, err := c.brigade.GetProjectLastBuild(prj.ID)
+		lastBuilds, err := c.brigade.GetProjectLastBuilds(prj.ID, projectLastBuildsQuantity)
 		if err != nil {
 			continue
 		}
-		p.LastBuild = c.transformBuild(lastBuild)
+
+		lb := []*Build{}
+		for _, b := range lastBuilds {
+			lb = append(lb, c.transformBuild(b))
+		}
+		p.LastBuilds = lb
 	}
 
 	return &ProjectListPageContext{
