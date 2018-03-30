@@ -130,14 +130,19 @@ func (p *ProjectList) fillProjectList(ctx *controller.ProjectListPageContext) {
 		color := unknownColor
 		icon := unknownIcon
 
-		if project.LastBuild != nil {
-			color = getColorFromState(project.LastBuild.State)
-			icon = getIconFromState(project.LastBuild.State)
+		var lastBuild *controller.Build
+		if len(project.LastBuilds) >= 1 {
+			lastBuild = project.LastBuilds[0]
+		}
+
+		if lastBuild != nil {
+			color = getColorFromState(lastBuild.State)
+			icon = getIconFromState(lastBuild.State)
 
 			// Calculate lastbuild data.
-			event = project.LastBuild.EventType
-			version = project.LastBuild.Version
-			since = time.Since(project.LastBuild.Started).Truncate(time.Second * 1)
+			event = lastBuild.EventType
+			version = lastBuild.Version
+			since = time.Since(lastBuild.Started).Truncate(time.Second * 1)
 		}
 
 		// Set the index so we can get the project ID on selection.
@@ -149,6 +154,18 @@ func (p *ProjectList) fillProjectList(ctx *controller.ProjectListPageContext) {
 		p.projectsTable.SetCell(rowPosition, 3, &tview.TableCell{Text: version, Align: tview.AlignLeft, Color: color})
 		p.projectsTable.SetCell(rowPosition, 4, &tview.TableCell{Text: fmt.Sprintf("%v ago", since), Align: tview.AlignLeft, Color: color})
 
+		// Add the last build status
+		columnPosition := 5
+		for _, b := range project.LastBuilds {
+			color := unknownColor
+			icon := unknownIcon
+			if lastBuild != nil {
+				color = getColorFromState(b.State)
+				icon = getIconFromState(b.State)
+			}
+			p.projectsTable.SetCell(rowPosition, columnPosition, &tview.TableCell{Text: fmt.Sprintf(" %s ", icon), Align: tview.AlignCenter, BackgroundColor: color, Color: tcell.ColorBlack})
+			columnPosition++
+		}
 		rowPosition++
 	}
 

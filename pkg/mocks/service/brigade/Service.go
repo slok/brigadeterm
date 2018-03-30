@@ -145,22 +145,22 @@ func (_m *Service) GetProjectBuilds(project *brigade.Project, desc bool) ([]*bri
 	return r0, r1
 }
 
-// GetProjectLastBuild provides a mock function with given fields: projectID
-func (_m *Service) GetProjectLastBuild(projectID string) (*brigade.Build, error) {
-	ret := _m.Called(projectID)
+// GetProjectLastBuilds provides a mock function with given fields: projectID, quantity
+func (_m *Service) GetProjectLastBuilds(projectID string, quantity int) ([]*brigade.Build, error) {
+	ret := _m.Called(projectID, quantity)
 
-	var r0 *brigade.Build
-	if rf, ok := ret.Get(0).(func(string) *brigade.Build); ok {
-		r0 = rf(projectID)
+	var r0 []*brigade.Build
+	if rf, ok := ret.Get(0).(func(string, int) []*brigade.Build); ok {
+		r0 = rf(projectID, quantity)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*brigade.Build)
+			r0 = ret.Get(0).([]*brigade.Build)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(projectID)
+	if rf, ok := ret.Get(1).(func(string, int) error); ok {
+		r1 = rf(projectID, quantity)
 	} else {
 		r1 = ret.Error(1)
 	}
