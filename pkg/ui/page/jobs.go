@@ -73,7 +73,7 @@ func (b *BuildJobList) createComponents() {
 	b.layout = tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(b.jobsPipeline, 0, 2, false).
-		AddItem(b.jobsList, 0, 6, true).
+		AddItem(b.jobsList, 0, 4, true).
 		AddItem(b.usage, 1, 1, false)
 }
 
