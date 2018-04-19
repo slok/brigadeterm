@@ -1,33 +1,14 @@
-# Gopkg.toml example
-#
-# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
-# for detailed Gopkg.toml documentation.
-#
-# required = ["github.com/user/thing/cmd/thing"]
-# ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
-#
-# [[constraint]]
-#   name = "github.com/user/project"
-#   version = "1.0.0"
-#
-# [[constraint]]
-#   name = "github.com/user/project2"
-#   branch = "dev"
-#   source = "github.com/myfork/project2"
-#
-# [[override]]
-#   name = "github.com/x/y"
-#   version = "2.4.0"
-#
-# [prune]
-#   non-go = false
-#   go-tests = true
-#   unused-packages = true
-
 # Override k8s deps.
 [[override]]
   name = "k8s.io/client-go"
   version = "7.0.0"
+
+# Fix client-go Azure/go-autorest constraint
+# TODO: Remove this when updated on client-go.
+# https://github.com/kubernetes/client-go/issues/379
+[[override]]
+  name = "github.com/Azure/go-autorest"
+  version = "9.10.0"
 
 # Project deps.
 [[constraint]]
