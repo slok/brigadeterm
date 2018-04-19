@@ -14,7 +14,7 @@ const (
 	projectInfoFMT = `[yellow]Project: [white]%s
 [yellow]URL: [white]%s
 [yellow]Namespace: [white]%s`
-	projectBuildListUsage = `[yellow](F5) [white]Reload    [yellow](<-/Del) [white]Back    [yellow](ESC) [white]Home    [yellow](ctrl+Q) [white]Quit`
+	projectBuildListUsage = `[yellow](F5) [white]Reload    [yellow](<-/Del) [white]Back    [yellow](ESC) [white]Home    [yellow](Q) [white]Quit`
 )
 
 const (
@@ -93,14 +93,22 @@ func (p *ProjectBuildList) Refresh(projectID string) {
 	// Set key handlers.
 	p.buildsTable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
+		// Reload.
 		case tcell.KeyF5:
-			// Reload.
 			p.router.LoadProjectBuildList(projectID)
+		// Back.
 		case tcell.KeyLeft, tcell.KeyDelete, tcell.KeyEsc:
-			// Back.
 			p.router.LoadProjectList()
-		case tcell.KeyCtrlQ:
-			p.router.Exit()
+		// Regular keys handling:
+		case tcell.KeyRune:
+			switch event.Rune() {
+			// Reload.
+			case 'r', 'R':
+				p.router.LoadProjectBuildList(projectID)
+			// Exit
+			case 'q', 'Q':
+				p.router.Exit()
+			}
 		}
 		return event
 	})

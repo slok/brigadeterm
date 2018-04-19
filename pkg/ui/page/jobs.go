@@ -21,7 +21,7 @@ const (
 	pipelineColor       = tcell.ColorYellow
 	pipelineTitle       = "Pipeline timeline (total duration: %s)"
 
-	buildJobListUsage = `[yellow](F5) [white]Reload    [yellow](<-/Del) [white]Back    [yellow](ESC) [white]Home    [yellow](ctrl+Q) [white]Quit`
+	buildJobListUsage = `[yellow](F5) [white]Reload    [yellow](<-/Del) [white]Back    [yellow](ESC) [white]Home    [yellow](Q) [white]Quit`
 )
 
 // BuildJobList is the page where a build job list will be available.
@@ -97,17 +97,25 @@ func (b *BuildJobList) Refresh(projectID, buildID string) {
 	// Set key handlers.
 	b.jobsList.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
+		// Reload.
 		case tcell.KeyF5:
-			// Reload.
 			b.router.LoadBuildJobList(projectID, buildID)
+		// Back.
 		case tcell.KeyLeft, tcell.KeyDelete:
-			// Back.
 			b.router.LoadProjectBuildList(projectID)
+		// Home.
 		case tcell.KeyEsc:
-			// Home.
 			b.router.LoadProjectList()
-		case tcell.KeyCtrlQ:
-			b.router.Exit()
+		// Regular keys handling:
+		case tcell.KeyRune:
+			switch event.Rune() {
+			// Reload.
+			case 'r', 'R':
+				b.router.LoadBuildJobList(projectID, buildID)
+			// Exit
+			case 'q', 'Q':
+				b.router.Exit()
+			}
 		}
 		return event
 	})
