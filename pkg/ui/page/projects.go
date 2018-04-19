@@ -15,7 +15,7 @@ const (
 	// ProjectListPageName is the name that identifies thi projectList page.
 	ProjectListPageName = "projectlist"
 
-	projectListUsage = `[yellow](F5) [white]Reload    [yellow](ctrl+Q) [white]Quit`
+	projectListUsage = `[yellow](F5) [white]Reload    [yellow](Q) [white]Quit`
 )
 
 // ProjectList is the main page where the project list will be available.
@@ -63,11 +63,19 @@ func (p *ProjectList) Refresh() {
 	// Set key handlers.
 	p.projectsTable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
+		// Reload.
 		case tcell.KeyF5:
-			// Reload.
 			p.router.LoadProjectList()
-		case tcell.KeyCtrlQ:
-			p.router.Exit()
+		// Regular keys handling:
+		case tcell.KeyRune:
+			switch event.Rune() {
+			// Reload.
+			case 'r', 'R':
+				p.router.LoadProjectList()
+			// Exit
+			case 'q', 'Q':
+				p.router.Exit()
+			}
 		}
 		return event
 	})
