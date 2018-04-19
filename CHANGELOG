@@ -1,5 +1,7 @@
 ## x.x.x / 2018-xx-xx
 
+* [ENHACEMENT] (k8s) Update to 0.7.0 Kubernetes go client lib.
+* [ENHACEMENT] (k8s) Load all available credential types in the Kubernetes go client lib.
 * [ENHACEMENT] (Brigade) Update to Brigade v0.13
 
 ## 0.2.0 / 2018-03-30
