@@ -97,7 +97,7 @@ func (p *ProjectBuildList) Refresh(projectID string) {
 		case tcell.KeyF5:
 			p.router.LoadProjectBuildList(projectID)
 		// Back.
-		case tcell.KeyLeft, tcell.KeyDelete, tcell.KeyEsc:
+		case tcell.KeyLeft, tcell.KeyDelete, tcell.KeyEsc, tcell.KeyBackspace, tcell.KeyBackspace2:
 			p.router.LoadProjectList()
 		// Regular keys handling:
 		case tcell.KeyRune:
