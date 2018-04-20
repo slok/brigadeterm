@@ -134,7 +134,11 @@ func (s *service) GetProjectBuilds(project *brigademodel.Project, desc bool) ([]
 
 	// Order builds in descending order (last ones first).
 	sort.Slice(res, func(i, j int) bool {
+		// If no data move at the end of the list.
 		if res[i].Worker == nil || res[j].Worker == nil {
+			if desc {
+				return true
+			}
 			return false
 		}
 
