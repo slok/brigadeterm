@@ -101,7 +101,7 @@ func (b *BuildJobList) Refresh(projectID, buildID string) {
 		case tcell.KeyF5:
 			b.router.LoadBuildJobList(projectID, buildID)
 		// Back.
-		case tcell.KeyLeft, tcell.KeyDelete:
+		case tcell.KeyLeft, tcell.KeyDelete, tcell.KeyBackspace, tcell.KeyBackspace2:
 			b.router.LoadProjectBuildList(projectID)
 		// Home.
 		case tcell.KeyEsc:

@@ -96,7 +96,7 @@ func (j *JobLog) Refresh(projectID, buildID, jobID string) {
 		case tcell.KeyF5:
 			j.router.LoadJobLog(projectID, buildID, jobID)
 		// Back.
-		case tcell.KeyLeft, tcell.KeyDelete:
+		case tcell.KeyLeft, tcell.KeyDelete, tcell.KeyBackspace, tcell.KeyBackspace2:
 			j.router.LoadBuildJobList(projectID, buildID)
 		// Home.
 		case tcell.KeyEsc:
