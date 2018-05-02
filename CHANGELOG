@@ -1,11 +1,11 @@
 ## 0.3.0 / 2018-04-20
 
-* [ENHACEMENT] (UI) Adds Backspace to go back.
-* [ENHACEMENT] (UI) Adds R for reloading as keybinding.
-* [ENHACEMENT] (UI) Adds Q for quit as keybinding.
-* [ENHACEMENT] (k8s) Update to 0.7.0 Kubernetes go client lib.
-* [ENHACEMENT] (k8s) Load all available credential types in the Kubernetes go client lib.
-* [ENHACEMENT] (Brigade) Update to Brigade v0.13.
+* [ENHANCEMENT] (UI) Add Backspace to go back.
+* [ENHANCEMENT] (UI) Add R for reloading as keybinding.
+* [ENHANCEMENT] (UI) Add Q for quit as keybinding.
+* [ENHANCEMENT] (k8s) Update to 0.7.0 Kubernetes go client lib.
+* [ENHANCEMENT] (k8s) Load all available credential types in the Kubernetes go client lib.
+* [ENHANCEMENT] (Brigade) Update to Brigade v0.13.
 
 ## 0.2.0 / 2018-03-30
 
