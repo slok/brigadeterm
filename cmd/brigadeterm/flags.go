@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"k8s.io/client-go/util/homedir"
 )
 
 type cmdFlags struct {
@@ -25,7 +23,13 @@ func newCmdFlags() (*cmdFlags, error) {
 	return fls, err
 }
 func (c *cmdFlags) init() error {
-	kubehome := filepath.Join(homedir.HomeDir(), ".kube", "config")
+	var kubehome string
+
+	if kubehome = os.Getenv("KUBECONFIG"); kubehome == "" {
+		kubehome = filepath.Join(
+			os.Getenv("HOME"), ".kube", "config",
+		)
+	}
 
 	// register flags
 	c.fs.StringVar(&c.kubeConfig, "kubeconfig", kubehome, "kubernetes configuration path, only used when development mode enabled")
