@@ -19,12 +19,12 @@ const (
 	projectListUsage = `[yellow](F5) [white]Reload    [yellow](/) [white]Filter    [yellow](Q) [white]Quit`
 )
 
-var projectListFilter string
-
 // ProjectList is the main page where the project list will be available.
 type ProjectList struct {
 	controller controller.Controller
 	router     *Router
+
+	projectListFilter string
 
 	// page layout
 	layout tview.Primitive
@@ -143,52 +143,15 @@ func (p *ProjectList) fillUsage() {
 }
 
 func (p *ProjectList) setFilter(term string) {
-	projectListFilter = term
+	p.projectListFilter = term
 }
 
-func (p *ProjectList) filterSetItemVisibility(rowIndex int, visibility bool) {
-	var colIndex int
-	var colCount int
-	colCount = p.projectsTable.GetColumnCount()
-	for colIndex = 0; colIndex < colCount; colIndex++ {
-		myTCell := p.projectsTable.GetCell(rowIndex, colIndex)
-		if visibility == true {
-			myTCell.SetSelectable(true)
-		} else {
-			myTCell.SetSelectable(false)
-		}
-		if colIndex < 5 { // for everything, except the "icons"
-			if visibility == true {
-				myTCell.SetTextColor(tcell.ColorGray)
-			} else {
-				myTCell.SetTextColor(tcell.ColorBlack)
-			}
-		} else { // only for the "icons"
-			if visibility == true {
-				myTCell.SetBackgroundColor(tcell.ColorGray)
-			} else {
-				myTCell.SetBackgroundColor(tcell.ColorBlack)
-			}
-		}
-	}
+func (p *ProjectList) getFilter() string {
+	return p.projectListFilter
 }
 
 func (p *ProjectList) filter() {
-	var projectsCount int
-	var rowIndex int
-	projectsCount = p.projectsTable.GetRowCount()
-	for rowIndex = 1; rowIndex < projectsCount; rowIndex++ {
-		tableCell := p.projectsTable.GetCell(rowIndex, 1)
-		projectName := tableCell.Text
-		// hide the current row, if it does not match the
-		// projectListFilter
-		if projectListFilter != "" && strings.Contains(strings.ToLower(projectName), projectListFilter) == false {
-			p.filterSetItemVisibility(rowIndex, false)
-		} else { // show the current row
-			p.filterSetItemVisibility(rowIndex, true)
-		}
-
-	}
+	p.router.LoadProjectList()
 }
 
 func (p *ProjectList) fillProjectList(ctx *controller.ProjectListPageContext) {
@@ -206,8 +169,13 @@ func (p *ProjectList) fillProjectList(ctx *controller.ProjectListPageContext) {
 
 	// Set body.
 	rowPosition := 1
+	filter := p.getFilter()
 	for _, project := range ctx.Projects {
 		if project == nil {
+			continue
+		}
+
+		if filter != "" && strings.Contains(strings.ToLower(project.Name), filter) == false {
 			continue
 		}
 
@@ -267,5 +235,4 @@ func (p *ProjectList) fillProjectList(ctx *controller.ProjectListPageContext) {
 			p.router.LoadProjectBuildList(projectID)
 		}
 	})
-	p.filter()
 }
