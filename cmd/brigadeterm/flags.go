@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"k8s.io/client-go/util/homedir"
 )
 
 type cmdFlags struct {
@@ -26,9 +28,7 @@ func (c *cmdFlags) init() error {
 	var kubehome string
 
 	if kubehome = os.Getenv("KUBECONFIG"); kubehome == "" {
-		kubehome = filepath.Join(
-			os.Getenv("HOME"), ".kube", "config",
-		)
+		kubehome = filepath.Join(homedir.HomeDir(), ".kube", "config")
 	}
 
 	// register flags
