@@ -25,7 +25,11 @@ func newCmdFlags() (*cmdFlags, error) {
 	return fls, err
 }
 func (c *cmdFlags) init() error {
-	kubehome := filepath.Join(homedir.HomeDir(), ".kube", "config")
+	var kubehome string
+
+	if kubehome = os.Getenv("KUBECONFIG"); kubehome == "" {
+		kubehome = filepath.Join(homedir.HomeDir(), ".kube", "config")
+	}
 
 	// register flags
 	c.fs.StringVar(&c.kubeConfig, "kubeconfig", kubehome, "kubernetes configuration path, only used when development mode enabled")
