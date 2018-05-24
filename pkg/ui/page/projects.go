@@ -108,7 +108,7 @@ func (p *ProjectList) createComponents() {
 			} else {
 				p.filterInputField.SetLabelColor(tcell.ColorYellow)
 			}
-			p.setFilter(term)
+			p.projectListFilter = term
 			p.filter()
 			p.router.app.SetFocus(p.projectsTable)
 		})
@@ -141,14 +141,6 @@ func (p *ProjectList) fillUsage() {
 	p.usage.SetText(projectListUsage)
 }
 
-func (p *ProjectList) setFilter(term string) {
-	p.projectListFilter = term
-}
-
-func (p *ProjectList) getFilter() string {
-	return p.projectListFilter
-}
-
 func (p *ProjectList) filter() {
 	p.router.LoadProjectList()
 }
@@ -168,7 +160,7 @@ func (p *ProjectList) fillProjectList(ctx *controller.ProjectListPageContext) {
 
 	// Set body.
 	rowPosition := 1
-	filter := p.getFilter()
+	filter := p.projectListFilter
 	for _, project := range ctx.Projects {
 		if project == nil {
 			continue
