@@ -126,7 +126,6 @@ func (p *ProjectList) createComponents() {
 	// Create the layout.
 	p.layout = tview.NewFlex().
 		SetDirection(tview.FlexRow).
-		// AddItem(p.projectsTable, 0, 1, true).
 		AddItem(p.projectsTable, 0, 1, true).
 		AddItem(p.usage, 1, 1, false).
 		AddItem(p.filterInputField, 1, 1, true)
