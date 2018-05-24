@@ -128,7 +128,7 @@ func (p *ProjectList) createComponents() {
 		SetDirection(tview.FlexRow).
 		AddItem(p.projectsTable, 0, 1, true).
 		AddItem(p.usage, 1, 1, false).
-		AddItem(p.filterInputField, 1, 1, true)
+		AddItem(p.filterInputField, 1, 1, false)
 }
 
 func (p *ProjectList) fill(ctx *controller.ProjectListPageContext) {
