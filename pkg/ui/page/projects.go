@@ -2,6 +2,7 @@ package page
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -15,7 +16,7 @@ const (
 	// ProjectListPageName is the name that identifies thi projectList page.
 	ProjectListPageName = "projectlist"
 
-	projectListUsage = `[yellow](F5) [white]Reload    [yellow](Q) [white]Quit`
+	projectListUsage = `[yellow](F5) [white]Reload    [yellow](/) [white]Filter    [yellow](Q) [white]Quit`
 )
 
 // ProjectList is the main page where the project list will be available.
@@ -23,14 +24,22 @@ type ProjectList struct {
 	controller controller.Controller
 	router     *Router
 
+	projectListFilter string
+
 	// page layout
 	layout tview.Primitive
 
 	// components
-	projectsTable *tview.Table
-	usage         *tview.TextView
+	projectsTable    *tview.Table
+	usage            *tview.TextView
+	filterInputField *tview.InputField
 
 	registerPageOnce sync.Once
+}
+
+func (p *ProjectList) focusFilterForm() {
+	p.filterInputField.SetLabelColor(tcell.ColorYellow)
+	p.router.app.SetFocus(p.filterInputField)
 }
 
 // NewProjectList returns a new project list.
@@ -69,6 +78,9 @@ func (p *ProjectList) Refresh() {
 		// Regular keys handling:
 		case tcell.KeyRune:
 			switch event.Rune() {
+			// filter
+			case '/':
+				p.focusFilterForm()
 			// Reload.
 			case 'r', 'R':
 				p.router.LoadProjectList()
@@ -84,6 +96,22 @@ func (p *ProjectList) Refresh() {
 
 // createComponents will create all the layout components.
 func (p *ProjectList) createComponents() {
+	p.filterInputField = tview.NewInputField().
+		SetLabel("Filter: ")
+	p.filterInputField.
+		SetFieldBackgroundColor(tcell.ColorBlack).
+		SetLabelColor(tcell.ColorBlack).
+		SetDoneFunc(func(key tcell.Key) {
+			term := p.filterInputField.GetText()
+			if term == "" {
+				p.filterInputField.SetLabelColor(tcell.ColorBlack)
+			} else {
+				p.filterInputField.SetLabelColor(tcell.ColorYellow)
+			}
+			p.projectListFilter = term
+			p.filter()
+			p.router.app.SetFocus(p.projectsTable)
+		})
 	// Set up columns
 	p.projectsTable = tview.NewTable().
 		SetSelectable(true, false)
@@ -99,7 +127,8 @@ func (p *ProjectList) createComponents() {
 	p.layout = tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(p.projectsTable, 0, 1, true).
-		AddItem(p.usage, 1, 1, false)
+		AddItem(p.usage, 1, 1, false).
+		AddItem(p.filterInputField, 1, 1, false)
 }
 
 func (p *ProjectList) fill(ctx *controller.ProjectListPageContext) {
@@ -110,6 +139,10 @@ func (p *ProjectList) fill(ctx *controller.ProjectListPageContext) {
 func (p *ProjectList) fillUsage() {
 	p.usage.Clear()
 	p.usage.SetText(projectListUsage)
+}
+
+func (p *ProjectList) filter() {
+	p.router.LoadProjectList()
 }
 
 func (p *ProjectList) fillProjectList(ctx *controller.ProjectListPageContext) {
@@ -127,8 +160,13 @@ func (p *ProjectList) fillProjectList(ctx *controller.ProjectListPageContext) {
 
 	// Set body.
 	rowPosition := 1
+	filter := p.projectListFilter
 	for _, project := range ctx.Projects {
 		if project == nil {
+			continue
+		}
+
+		if filter != "" && strings.Contains(strings.ToLower(project.Name), filter) == false {
 			continue
 		}
 
