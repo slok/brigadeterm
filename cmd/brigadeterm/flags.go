@@ -12,6 +12,7 @@ import (
 type cmdFlags struct {
 	fs               *flag.FlagSet
 	kubeConfig       string
+	kubeContext      string
 	brigadeNamespace string
 	showVersion      bool
 }
@@ -32,9 +33,10 @@ func (c *cmdFlags) init() error {
 	}
 
 	// register flags
-	c.fs.StringVar(&c.kubeConfig, "kubeconfig", kubehome, "kubernetes configuration path, only used when development mode enabled")
-	c.fs.StringVar(&c.brigadeNamespace, "namespace", "default", "kubernetes namespace where brigade is running")
-	c.fs.BoolVar(&c.showVersion, "version", false, "show app version")
+	c.fs.StringVar(&c.kubeConfig, "kubeconfig", kubehome, "Kubernetes configuration path, only used when development mode enabled")
+	c.fs.StringVar(&c.brigadeNamespace, "namespace", "default", "Kubernetes namespace where brigade is running")
+	c.fs.StringVar(&c.kubeContext, "context", "", "Kubernetes context to use. Default to current context configured in kubeconfig")
+	c.fs.BoolVar(&c.showVersion, "version", false, "Show app version")
 
 	// Parse flags
 	if err := c.fs.Parse(os.Args[1:]); err != nil {
