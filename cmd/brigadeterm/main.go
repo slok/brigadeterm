@@ -79,7 +79,14 @@ func (m *Main) createKubernetesClients() (kubernetes.Interface, error) {
 
 // loadKubernetesConfig loads kubernetes configuration based on flags.
 func (m *Main) loadKubernetesConfig() (*rest.Config, error) {
-	return clientcmd.BuildConfigFromFlags("", m.flags.kubeConfig)
+	loader := &clientcmd.ClientConfigLoadingRules{
+		ExplicitPath: m.flags.kubeConfig,
+	}
+	overrides := &clientcmd.ConfigOverrides{
+		CurrentContext: m.flags.kubeContext,
+	}
+
+	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loader, overrides).ClientConfig()
 }
 
 // printVersion prints the version of the app.
