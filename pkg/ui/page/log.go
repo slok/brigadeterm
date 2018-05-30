@@ -81,6 +81,7 @@ func (j *JobLog) Register(pages *tview.Pages) {
 
 // BeforeLoad satisfies Page interface.
 func (j *JobLog) BeforeLoad() {
+	j.logBox.ScrollToEnd()
 }
 
 // Refresh will refresh all the page data.
