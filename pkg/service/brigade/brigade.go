@@ -2,6 +2,7 @@ package brigade
 
 import (
 	"fmt"
+	"io"
 	"sort"
 
 	"github.com/Azure/brigade/pkg/storage"
@@ -28,6 +29,8 @@ type Service interface {
 	GetJob(jobID string) (*brigademodel.Job, error)
 	// GetJobLog will get a job log.
 	GetJobLog(jobID string) (string, error)
+	// GetJobLogStream will get a job log stream.
+	GetJobLogStream(jobID string) (io.ReadCloser, error)
 }
 
 // repository will use kubernetes as repository for the brigade objects.
@@ -192,7 +195,6 @@ func (s *service) GetJob(jobID string) (*brigademodel.Job, error) {
 
 // GetJobLog satisfies Service interface.
 func (s *service) GetJobLog(jobID string) (string, error) {
-	// TODO: Change to stream.
 	job, err := s.client.GetJob(jobID)
 	if err != nil {
 		return "", err
@@ -204,4 +206,20 @@ func (s *service) GetJobLog(jobID string) (string, error) {
 	}
 
 	return str, nil
+}
+
+// GetJobLog satisfies Service interface.
+func (s *service) GetJobLogStream(jobID string) (io.ReadCloser, error) {
+	job, err := s.client.GetJob(jobID)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: Brigade doesn't set the follow (PR submited: https://github.com/Azure/brigade/pull/492)
+	rc, err := s.client.GetJobLogStream(job)
+	if err != nil {
+		return nil, err
+	}
+
+	return rc, nil
 }
