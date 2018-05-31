@@ -23,6 +23,7 @@ const (
 type ProjectList struct {
 	controller controller.Controller
 	router     *Router
+	app        *tview.Application
 
 	projectListFilter string
 
@@ -43,10 +44,11 @@ func (p *ProjectList) focusFilterForm() {
 }
 
 // NewProjectList returns a new project list.
-func NewProjectList(controller controller.Controller, router *Router) *ProjectList {
+func NewProjectList(controller controller.Controller, app *tview.Application, router *Router) *ProjectList {
 	p := &ProjectList{
 		controller: controller,
 		router:     router,
+		app:        app,
 	}
 	p.createComponents()
 	return p

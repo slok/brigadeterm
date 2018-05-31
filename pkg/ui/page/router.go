@@ -23,10 +23,10 @@ func NewRouter(app *tview.Application, controller controller.Controller, pages *
 	}
 
 	// Create the pages.
-	r.projectListPage = NewProjectList(controller, r)
-	r.projectBuildListPage = NewProjectBuildList(controller, r)
-	r.buildJobListPage = NewBuildJobList(controller, r)
-	r.jobLogPage = NewJobLog(controller, r)
+	r.projectListPage = NewProjectList(controller, app, r)
+	r.projectBuildListPage = NewProjectBuildList(controller, app, r)
+	r.buildJobListPage = NewBuildJobList(controller, app, r)
+	r.jobLogPage = NewJobLog(controller, app, r)
 
 	// Register our pages on the app pages container.
 	r.register()
