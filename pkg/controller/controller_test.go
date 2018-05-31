@@ -1,6 +1,9 @@
 package controller_test
 
 import (
+	"bytes"
+	"io"
+	"io/ioutil"
 	"testing"
 	"time"
 
@@ -400,7 +403,7 @@ func TestControllerJobLogPageContext(t *testing.T) {
 	tests := []struct {
 		name   string
 		job    *brigademodel.Job
-		log    string
+		log    io.ReadCloser
 		expCtx *controller.JobLogPageContext
 	}{
 		{
@@ -413,7 +416,7 @@ func TestControllerJobLogPageContext(t *testing.T) {
 				StartTime: start,
 				EndTime:   end,
 			},
-			log: "my awesome log",
+			log: ioutil.NopCloser(bytes.NewBufferString("my awesome log")),
 			expCtx: &controller.JobLogPageContext{
 				Job: &controller.Job{
 					ID:      "j1",
@@ -423,7 +426,7 @@ func TestControllerJobLogPageContext(t *testing.T) {
 					Started: start,
 					Ended:   end,
 				},
-				Log: []byte("my awesome log"),
+				Log: ioutil.NopCloser(bytes.NewBufferString("my awesome log")),
 			},
 		},
 	}
@@ -435,7 +438,7 @@ func TestControllerJobLogPageContext(t *testing.T) {
 			// Mocks.
 			mb := &mbrigade.Service{}
 			mb.On("GetJob", mock.Anything).Return(test.job, nil)
-			mb.On("GetJobLog", mock.Anything).Return(test.log, nil)
+			mb.On("GetJobLogStream", mock.Anything).Return(test.log, nil)
 
 			c := controller.NewController(mb)
 			ctx := c.JobLogPageContext("whatever")

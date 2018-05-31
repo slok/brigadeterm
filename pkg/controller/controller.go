@@ -131,7 +131,7 @@ func (c *controller) JobLogPageContext(jobID string) *JobLogPageContext {
 		}
 	}
 
-	log, err := c.brigade.GetJobLog(jobID)
+	logStrm, err := c.brigade.GetJobLogStream(jobID)
 	if err != nil {
 		return &JobLogPageContext{
 			Error: fmt.Errorf("there was an error while getting %s job log: %s", jobID, err),
@@ -140,7 +140,7 @@ func (c *controller) JobLogPageContext(jobID string) *JobLogPageContext {
 
 	return &JobLogPageContext{
 		Job: c.transformJob(job),
-		Log: []byte(log),
+		Log: logStrm,
 	}
 }
 

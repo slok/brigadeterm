@@ -2,6 +2,8 @@ package controller
 
 import (
 	"fmt"
+	"io"
+	"strings"
 	"time"
 )
 
@@ -277,16 +279,8 @@ func (f *fake) BuildJobListPageContext(buildID string) *BuildJobListPageContext 
 }
 
 func (f *fake) JobLogPageContext(jobID string) *JobLogPageContext {
-	return &JobLogPageContext{
-		Job: &Job{
-			ID:      "build-binary-3-01c8zehre13ht12776hdkms8gf",
-			Name:    "build-binary-3",
-			Image:   "docker:stable-dind",
-			State:   SuccessedState,
-			Started: staticNow.Add(-9 * time.Minute),
-			Ended:   time.Now().Add(-3 * time.Minute),
-		},
-		Log: []byte(fmt.Sprintf(`
+
+	log := fmt.Sprintf(`
 %v
 =========
 
@@ -443,6 +437,34 @@ cd7100a72410: Layer already exists
 a986eb0e7a89: Layer already exists
 3c84a9666104: Layer already exists
 latest: digest: sha256:ac500411b48ff5ef31efb5d96b543d725dc97493a983cd2430de00d1c5221adb size: 949
-`, time.Now().UTC())),
+`, time.Now().UTC())
+
+	// Create a pipe for our fake log.
+	r, w := io.Pipe()
+
+	// Stream the log
+	go func() {
+		defer w.Close()
+		splLog := strings.Split(log, "\n")
+		for _, line := range splLog {
+			_, err := fmt.Fprintf(w, "%s\n", line)
+			if err != nil {
+				return // Something happenned, we don't mind if it's ended or not, stop.
+			}
+			sleepMS := time.Duration(time.Now().Nanosecond() % 1000)
+			time.Sleep(sleepMS * time.Millisecond)
+		}
+	}()
+
+	return &JobLogPageContext{
+		Job: &Job{
+			ID:      "build-binary-3-01c8zehre13ht12776hdkms8gf",
+			Name:    "build-binary-3",
+			Image:   "docker:stable-dind",
+			State:   SuccessedState,
+			Started: staticNow.Add(-9 * time.Minute),
+			Ended:   time.Now().Add(-3 * time.Minute),
+		},
+		Log: r,
 	}
 }
