@@ -28,6 +28,8 @@ type Controller interface {
 	BuildJobListPageContext(buildID string) *BuildJobListPageContext
 	// JobLogPageContext returns the JobLogPage context.
 	JobLogPageContext(jobID string) *JobLogPageContext
+	// JobRunning returns if the job is running or finished.
+	JobRunning(jobID string) bool
 }
 
 type controller struct {
@@ -158,6 +160,20 @@ func (c *controller) JobLogPageContext(jobID string) *JobLogPageContext {
 		Job: c.transformJob(job),
 		Log: logStrm,
 	}
+}
+
+func (c *controller) JobRunning(jobID string) bool {
+	job, err := c.brigade.GetJob(jobID)
+	// If error assume the job is not running or doesn't exist so it's finished
+	if err != nil {
+		return false
+	}
+
+	if c.transformState(job.Status) == RunningState {
+		return true
+	}
+
+	return false
 }
 
 func (c *controller) transformBuild(b *brigademodel.Build) *Build {

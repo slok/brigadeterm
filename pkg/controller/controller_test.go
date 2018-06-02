@@ -477,3 +477,61 @@ func TestControllerJobLogPageContext(t *testing.T) {
 		})
 	}
 }
+
+func TestControllerJobRunning(t *testing.T) {
+	tests := []struct {
+		name string
+		job  *brigademodel.Job
+		exp  bool
+	}{
+		{
+			name: "Job running should return true",
+			job: &brigademodel.Job{
+				Status: azurebrigade.JobRunning,
+			},
+			exp: true,
+		},
+		{
+			name: "Job unknown should return false",
+			job: &brigademodel.Job{
+				Status: azurebrigade.JobUnknown,
+			},
+			exp: false,
+		},
+		{
+			name: "Job failed should return false",
+			job: &brigademodel.Job{
+				Status: azurebrigade.JobFailed,
+			},
+			exp: false,
+		},
+		{
+			name: "Job Succeeded should return false",
+			job: &brigademodel.Job{
+				Status: azurebrigade.JobSucceeded,
+			},
+			exp: false,
+		},
+		{
+			name: "Job Pending should return false",
+			job: &brigademodel.Job{
+				Status: azurebrigade.JobPending,
+			},
+			exp: false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert := assert.New(t)
+
+			// Mocks.
+			mb := &mbrigade.Service{}
+			mb.On("GetJob", mock.Anything).Return(test.job, nil)
+
+			c := controller.NewController(mb)
+			got := c.JobRunning("whatever")
+			assert.Equal(test.exp, got)
+		})
+	}
+}
