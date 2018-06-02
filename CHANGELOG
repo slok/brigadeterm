@@ -1,5 +1,6 @@
 ## x.x.x / 2018-0x-xx
 
+* [FEATURE] (UI) Allow live streaming of logs on job log UI.
 * [ENHANCEMENT] (Tview) Update tview to the latest revision in master branch.
 * [ENHANCEMENT] (Brigade) Update to Brigade v0.14.
 
