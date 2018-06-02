@@ -217,6 +217,9 @@ func (p *Pages) HasFocus() bool {
 
 // Focus is called by the application when the primitive receives focus.
 func (p *Pages) Focus(delegate func(p Primitive)) {
+	if delegate == nil {
+		return // We cannot delegate so we cannot focus.
+	}
 	p.setFocus = delegate
 	var topItem Primitive
 	for _, page := range p.pages {
@@ -231,6 +234,7 @@ func (p *Pages) Focus(delegate func(p Primitive)) {
 
 // Draw draws this primitive onto the screen.
 func (p *Pages) Draw(screen tcell.Screen) {
+	p.Box.Draw(screen)
 	for _, page := range p.pages {
 		if !page.Visible {
 			continue
