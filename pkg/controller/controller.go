@@ -1,7 +1,10 @@
 package controller
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"time"
 
 	azurebrigade "github.com/Azure/brigade/pkg/brigade"
@@ -131,11 +134,24 @@ func (c *controller) JobLogPageContext(jobID string) *JobLogPageContext {
 		}
 	}
 
-	logStrm, err := c.brigade.GetJobLogStream(jobID)
+	var logStrm io.ReadCloser
+
+	// If the job is running then get a stream of logs.
+	if c.transformState(job.Status) == RunningState {
+		logStrm, err = c.brigade.GetJobLogStream(jobID)
+	} else {
+		logStrm, err = c.brigade.GetJobLog(jobID)
+	}
+
 	if err != nil {
 		return &JobLogPageContext{
 			Error: fmt.Errorf("there was an error while getting %s job log: %s", jobID, err),
 		}
+	}
+
+	// Set a dummy ReadCloser for safety reads on the variable.
+	if logStrm == nil {
+		logStrm = ioutil.NopCloser(new(bytes.Buffer))
 	}
 
 	return &JobLogPageContext{

@@ -28,8 +28,9 @@ type Service interface {
 	// GetJob will get a job.
 	GetJob(jobID string) (*brigademodel.Job, error)
 	// GetJobLog will get a job log.
-	GetJobLog(jobID string) (string, error)
-	// GetJobLogStream will get a job log stream.
+	GetJobLog(jobID string) (io.ReadCloser, error)
+	// GetJobLogStream will get a job log stream that will be updated when new logs
+	// are created, in other words this stream is a real time stream of a job log.
 	GetJobLogStream(jobID string) (io.ReadCloser, error)
 }
 
@@ -194,18 +195,21 @@ func (s *service) GetJob(jobID string) (*brigademodel.Job, error) {
 }
 
 // GetJobLog satisfies Service interface.
-func (s *service) GetJobLog(jobID string) (string, error) {
+func (s *service) GetJobLog(jobID string) (io.ReadCloser, error) {
 	job, err := s.client.GetJob(jobID)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	str, err := s.client.GetJobLog(job)
+	// This Brigade methos is not a live stream so it's lot faster than
+	// `GetJobLogStreamFollow` that it uses `follow: true` in the options
+	// of kube client to get the logs.
+	rc, err := s.client.GetJobLogStream(job)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return str, nil
+	return rc, nil
 }
 
 // GetJobLog satisfies Service interface.
@@ -215,8 +219,7 @@ func (s *service) GetJobLogStream(jobID string) (io.ReadCloser, error) {
 		return nil, err
 	}
 
-	// TODO: Brigade doesn't set the follow (PR submited: https://github.com/Azure/brigade/pull/492)
-	rc, err := s.client.GetJobLogStream(job)
+	rc, err := s.client.GetJobLogStreamFollow(job)
 	if err != nil {
 		return nil, err
 	}

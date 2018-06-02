@@ -80,14 +80,16 @@ func (_m *Service) GetJob(jobID string) (*brigade.Job, error) {
 }
 
 // GetJobLog provides a mock function with given fields: jobID
-func (_m *Service) GetJobLog(jobID string) (string, error) {
+func (_m *Service) GetJobLog(jobID string) (io.ReadCloser, error) {
 	ret := _m.Called(jobID)
 
-	var r0 string
-	if rf, ok := ret.Get(0).(func(string) string); ok {
+	var r0 io.ReadCloser
+	if rf, ok := ret.Get(0).(func(string) io.ReadCloser); ok {
 		r0 = rf(jobID)
 	} else {
-		r0 = ret.Get(0).(string)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(io.ReadCloser)
+		}
 	}
 
 	var r1 error

@@ -401,13 +401,14 @@ func TestControllerJobLogPageContext(t *testing.T) {
 	end := time.Now().Add(-4 * time.Minute)
 
 	tests := []struct {
-		name   string
-		job    *brigademodel.Job
-		log    io.ReadCloser
-		expCtx *controller.JobLogPageContext
+		name         string
+		job          *brigademodel.Job
+		log          io.ReadCloser
+		expCtx       *controller.JobLogPageContext
+		expStreaming bool
 	}{
 		{
-			name: "job log should return job's log context.",
+			name: "job log should return job's log context with a stream when running.",
 			job: &brigademodel.Job{
 				ID:        "j1",
 				Name:      "job-1",
@@ -416,13 +417,38 @@ func TestControllerJobLogPageContext(t *testing.T) {
 				StartTime: start,
 				EndTime:   end,
 			},
-			log: ioutil.NopCloser(bytes.NewBufferString("my awesome log")),
+			log:          ioutil.NopCloser(bytes.NewBufferString("my awesome log")),
+			expStreaming: true,
 			expCtx: &controller.JobLogPageContext{
 				Job: &controller.Job{
 					ID:      "j1",
 					Name:    "job-1",
 					Image:   "myimage/image:v0.1.0",
 					State:   controller.RunningState,
+					Started: start,
+					Ended:   end,
+				},
+				Log: ioutil.NopCloser(bytes.NewBufferString("my awesome log")),
+			},
+		},
+		{
+			name: "job log should return job's log context without a stream when not complete.",
+			job: &brigademodel.Job{
+				ID:        "j1",
+				Name:      "job-1",
+				Image:     "myimage/image:v0.1.0",
+				Status:    azurebrigade.JobSucceeded,
+				StartTime: start,
+				EndTime:   end,
+			},
+			log:          ioutil.NopCloser(bytes.NewBufferString("my awesome log")),
+			expStreaming: false,
+			expCtx: &controller.JobLogPageContext{
+				Job: &controller.Job{
+					ID:      "j1",
+					Name:    "job-1",
+					Image:   "myimage/image:v0.1.0",
+					State:   controller.SuccessedState,
 					Started: start,
 					Ended:   end,
 				},
@@ -438,7 +464,11 @@ func TestControllerJobLogPageContext(t *testing.T) {
 			// Mocks.
 			mb := &mbrigade.Service{}
 			mb.On("GetJob", mock.Anything).Return(test.job, nil)
-			mb.On("GetJobLogStream", mock.Anything).Return(test.log, nil)
+			if test.expStreaming {
+				mb.On("GetJobLogStream", mock.Anything).Return(test.log, nil)
+			} else {
+				mb.On("GetJobLog", mock.Anything).Return(test.log, nil)
+			}
 
 			c := controller.NewController(mb)
 			ctx := c.JobLogPageContext("whatever")
