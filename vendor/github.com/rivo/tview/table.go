@@ -33,6 +33,9 @@ type TableCell struct {
 	// The background color of the cell.
 	BackgroundColor tcell.Color
 
+	// The style attributes of the cell.
+	Attributes tcell.AttrMask
+
 	// If set to true, this cell cannot be selected.
 	NotSelectable bool
 
@@ -104,6 +107,22 @@ func (c *TableCell) SetTextColor(color tcell.Color) *TableCell {
 // tcell.ColorDefault to use the table's background color.
 func (c *TableCell) SetBackgroundColor(color tcell.Color) *TableCell {
 	c.BackgroundColor = color
+	return c
+}
+
+// SetAttributes sets the cell's text attributes. You can combine different
+// attributes using bitmask operations:
+//
+//   cell.SetAttributes(tcell.AttrUnderline | tcell.AttrBold)
+func (c *TableCell) SetAttributes(attr tcell.AttrMask) *TableCell {
+	c.Attributes = attr
+	return c
+}
+
+// SetStyle sets the cell's style (foreground color, background color, and
+// attributes) all at once.
+func (c *TableCell) SetStyle(style tcell.Style) *TableCell {
+	c.Color, c.BackgroundColor, c.Attributes = style.Decompose()
 	return c
 }
 
@@ -582,6 +601,7 @@ ColumnLoop:
 			tableWidth -= widths[t.fixedColumns] + 1
 			columns = append(columns[:t.fixedColumns], columns[t.fixedColumns+1:]...)
 			widths = append(widths[:t.fixedColumns], widths[t.fixedColumns+1:]...)
+			expansions = append(expansions[:t.fixedColumns], expansions[t.fixedColumns+1:]...)
 		}
 
 		// What's this column's width (without expansion)?
@@ -589,7 +609,7 @@ ColumnLoop:
 		expansion := 0
 		for _, row := range rows {
 			if cell := getCell(row, column); cell != nil {
-				cellWidth := StringWidth(cell.Text)
+				_, _, _, _, cellWidth := decomposeString(cell.Text)
 				if cell.MaxWidth > 0 && cell.MaxWidth < cellWidth {
 					cellWidth = cell.MaxWidth
 				}
@@ -683,11 +703,10 @@ ColumnLoop:
 				finalWidth = width - columnX - 1
 			}
 			cell.x, cell.y, cell.width = x+columnX+1, y+rowY, finalWidth
-			_, printed := Print(screen, cell.Text, x+columnX+1, y+rowY, finalWidth, cell.Align, cell.Color)
+			_, printed := printWithStyle(screen, cell.Text, x+columnX+1, y+rowY, finalWidth, cell.Align, tcell.StyleDefault.Foreground(cell.Color)|tcell.Style(cell.Attributes))
 			if StringWidth(cell.Text)-printed > 0 && printed > 0 {
 				_, _, style, _ := screen.GetContent(x+columnX+1+finalWidth-1, y+rowY)
-				fg, _, _ := style.Decompose()
-				Print(screen, string(GraphicsEllipsis), x+columnX+1+finalWidth-1, y+rowY, 1, AlignLeft, fg)
+				printWithStyle(screen, string(GraphicsEllipsis), x+columnX+1+finalWidth-1, y+rowY, 1, AlignLeft, style)
 			}
 		}
 
@@ -817,7 +836,7 @@ ColumnLoop:
 
 // InputHandler returns the handler for this primitive.
 func (t *Table) InputHandler() func(event *tcell.EventKey, setFocus func(p Primitive)) {
-	return t.wrapInputHandler(func(event *tcell.EventKey, setFocus func(p Primitive)) {
+	return t.WrapInputHandler(func(event *tcell.EventKey, setFocus func(p Primitive)) {
 		key := event.Key()
 
 		if (!t.rowsSelectable && !t.columnsSelectable && key == tcell.KeyEnter) ||

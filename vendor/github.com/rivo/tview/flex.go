@@ -33,17 +33,24 @@ type Flex struct {
 	// FlexRow or FlexColumn.
 	direction int
 
-	// If set to true, will use the entire screen as its available space instead
-	// its box dimensions.
+	// If set to true, Flex will use the entire screen as its available space
+	// instead its box dimensions.
 	fullScreen bool
 }
 
 // NewFlex returns a new flexbox layout container with no primitives and its
 // direction set to FlexColumn. To add primitives to this layout, see AddItem().
 // To change the direction, see SetDirection().
+//
+// Note that Box, the superclass of Flex, will have its background color set to
+// transparent so that any nil flex items will leave their background unchanged.
+// To clear a Flex's background before any items are drawn, set it to the
+// desired color:
+//
+//   flex.SetBackgroundColor(tview.Styles.PrimitiveBackgroundColor)
 func NewFlex() *Flex {
 	f := &Flex{
-		Box:       NewBox(),
+		Box:       NewBox().SetBackgroundColor(tcell.ColorDefault),
 		direction: FlexColumn,
 	}
 	f.focus = f
@@ -69,8 +76,8 @@ func (f *Flex) SetFullScreen(fullScreen bool) *Flex {
 // that its size is flexible and may be changed. The "proportion" argument
 // defines the relative size of the item compared to other flexible-size items.
 // For example, items with a proportion of 2 will be twice as large as items
-// with a proportion of 1. Must be at least 1 if fixedSize > 0 (ignored
-// otherwise)
+// with a proportion of 1. The proportion must be at least 1 if fixedSize == 0
+// (ignored otherwise).
 //
 // If "focus" is set to true, the item will receive focus when the Flex
 // primitive receives focus. If multiple items have the "focus" flag set to

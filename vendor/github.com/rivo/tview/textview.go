@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/gdamore/tcell"
+	colorful "github.com/lucasb-eyer/go-colorful"
 	runewidth "github.com/mattn/go-runewidth"
 )
 
@@ -17,12 +18,14 @@ var TabSize = 4
 // textViewIndex contains information about each line displayed in the text
 // view.
 type textViewIndex struct {
-	Line    int         // The index into the "buffer" variable.
-	Pos     int         // The index into the "buffer" string (byte position).
-	NextPos int         // The (byte) index of the next character in this buffer line.
-	Width   int         // The screen width of this line.
-	Color   tcell.Color // The starting color.
-	Region  string      // The starting region ID.
+	Line            int    // The index into the "buffer" variable.
+	Pos             int    // The index into the "buffer" string (byte position).
+	NextPos         int    // The (byte) index of the next character in this buffer line.
+	Width           int    // The screen width of this line.
+	ForegroundColor string // The starting foreground color ("" = don't change, "-" = reset).
+	BackgroundColor string // The starting background color ("" = don't change, "-" = reset).
+	Attributes      string // The starting attributes ("" = don't change, "-" = reset).
+	Region          string // The starting region ID.
 }
 
 // TextView is a box which displays text. It implements the io.Writer interface
@@ -267,6 +270,16 @@ func (t *TextView) SetDoneFunc(handler func(key tcell.Key)) *TextView {
 	return t
 }
 
+// ScrollTo scrolls to the specified row and column (both starting with 0).
+func (t *TextView) ScrollTo(row, column int) *TextView {
+	if !t.scrollable {
+		return t
+	}
+	t.lineOffset = row
+	t.columnOffset = column
+	return t
+}
+
 // ScrollToBeginning scrolls to the top left corner of the text if the text view
 // is scrollable.
 func (t *TextView) ScrollToBeginning() *TextView {
@@ -499,7 +512,6 @@ func (t *TextView) reindexBuffer(width int) {
 	// Initial states.
 	regionID := ""
 	var highlighted bool
-	color := t.textColor
 
 	// Go through each line in the buffer.
 	for bufferIndex, str := range t.buffer {
@@ -507,11 +519,10 @@ func (t *TextView) reindexBuffer(width int) {
 		var (
 			colorTagIndices [][]int
 			colorTags       [][]string
+			escapeIndices   [][]int
 		)
 		if t.dynamicColors {
-			colorTagIndices = colorPattern.FindAllStringIndex(str, -1)
-			colorTags = colorPattern.FindAllStringSubmatch(str, -1)
-			str = colorPattern.ReplaceAllString(str, "")
+			colorTagIndices, colorTags, escapeIndices, str, _ = decomposeString(str)
 		}
 
 		// Find all regions in this line. Then remove them.
@@ -523,13 +534,11 @@ func (t *TextView) reindexBuffer(width int) {
 			regionIndices = regionPattern.FindAllStringIndex(str, -1)
 			regions = regionPattern.FindAllStringSubmatch(str, -1)
 			str = regionPattern.ReplaceAllString(str, "")
-		}
-
-		// Find all replace tags in this line. Then replace them.
-		var escapeIndices [][]int
-		if t.dynamicColors || t.regions {
-			escapeIndices = escapePattern.FindAllStringIndex(str, -1)
-			str = escapePattern.ReplaceAllString(str, "[$1$2]")
+			if !t.dynamicColors {
+				// We haven't detected escape tags yet. Do it now.
+				escapeIndices = escapePattern.FindAllStringIndex(str, -1)
+				str = escapePattern.ReplaceAllString(str, "[$1$2]")
+			}
 		}
 
 		// Split the line if required.
@@ -559,13 +568,18 @@ func (t *TextView) reindexBuffer(width int) {
 		}
 
 		// Create index from split lines.
-		var originalPos, colorPos, regionPos, escapePos int
+		var (
+			originalPos, colorPos, regionPos, escapePos  int
+			foregroundColor, backgroundColor, attributes string
+		)
 		for _, splitLine := range splitLines {
 			line := &textViewIndex{
-				Line:   bufferIndex,
-				Pos:    originalPos,
-				Color:  color,
-				Region: regionID,
+				Line:            bufferIndex,
+				Pos:             originalPos,
+				ForegroundColor: foregroundColor,
+				BackgroundColor: backgroundColor,
+				Attributes:      attributes,
+				Region:          regionID,
 			}
 
 			// Shift original position with tags.
@@ -574,7 +588,7 @@ func (t *TextView) reindexBuffer(width int) {
 				if colorPos < len(colorTagIndices) && colorTagIndices[colorPos][0] <= originalPos+lineLength {
 					// Process color tags.
 					originalPos += colorTagIndices[colorPos][1] - colorTagIndices[colorPos][0]
-					color = tcell.GetColor(colorTags[colorPos][1])
+					foregroundColor, backgroundColor, attributes = styleFromTag(foregroundColor, backgroundColor, attributes, colorTags[colorPos])
 					colorPos++
 				} else if regionPos < len(regionIndices) && regionIndices[regionPos][0] <= originalPos+lineLength {
 					// Process region tags.
@@ -712,6 +726,7 @@ func (t *TextView) Draw(screen tcell.Screen) {
 	}
 
 	// Draw the buffer.
+	defaultStyle := tcell.StyleDefault.Foreground(t.textColor)
 	for line := t.lineOffset; line < len(t.index); line++ {
 		// Are we done?
 		if line-t.lineOffset >= height {
@@ -721,17 +736,19 @@ func (t *TextView) Draw(screen tcell.Screen) {
 		// Get the text for this line.
 		index := t.index[line]
 		text := t.buffer[index.Line][index.Pos:index.NextPos]
-		color := index.Color
+		foregroundColor := index.ForegroundColor
+		backgroundColor := index.BackgroundColor
+		attributes := index.Attributes
 		regionID := index.Region
 
 		// Get color tags.
 		var (
 			colorTagIndices [][]int
 			colorTags       [][]string
+			escapeIndices   [][]int
 		)
 		if t.dynamicColors {
-			colorTagIndices = colorPattern.FindAllStringIndex(text, -1)
-			colorTags = colorPattern.FindAllStringSubmatch(text, -1)
+			colorTagIndices, colorTags, escapeIndices, _, _ = decomposeString(text)
 		}
 
 		// Get regions.
@@ -742,12 +759,9 @@ func (t *TextView) Draw(screen tcell.Screen) {
 		if t.regions {
 			regionIndices = regionPattern.FindAllStringIndex(text, -1)
 			regions = regionPattern.FindAllStringSubmatch(text, -1)
-		}
-
-		// Get escape tags.
-		var escapeIndices [][]int
-		if t.dynamicColors || t.regions {
-			escapeIndices = escapePattern.FindAllStringIndex(text, -1)
+			if !t.dynamicColors {
+				escapeIndices = escapePattern.FindAllStringIndex(text, -1)
+			}
 		}
 
 		// Calculate the position of the line.
@@ -765,12 +779,62 @@ func (t *TextView) Draw(screen tcell.Screen) {
 		}
 
 		// Print the line.
-		var currentTag, currentRegion, currentEscapeTag, skipped int
+		var currentTag, currentRegion, currentEscapeTag, skipped, runeSeqWidth int
+		runeSequence := make([]rune, 0, 10)
+		flush := func() {
+			if len(runeSequence) == 0 {
+				return
+			}
+
+			// Mix the existing style with the new style.
+			_, _, existingStyle, _ := screen.GetContent(x+posX, y+line-t.lineOffset)
+			_, background, _ := existingStyle.Decompose()
+			style := overlayStyle(background, defaultStyle, foregroundColor, backgroundColor, attributes)
+
+			// Do we highlight this character?
+			var highlighted bool
+			if len(regionID) > 0 {
+				if _, ok := t.highlights[regionID]; ok {
+					highlighted = true
+				}
+			}
+			if highlighted {
+				fg, bg, _ := style.Decompose()
+				if bg == tcell.ColorDefault {
+					r, g, b := fg.RGB()
+					c := colorful.Color{R: float64(r) / 255, G: float64(g) / 255, B: float64(b) / 255}
+					_, _, li := c.Hcl()
+					if li < .5 {
+						bg = tcell.ColorWhite
+					} else {
+						bg = tcell.ColorBlack
+					}
+				}
+				style = style.Background(fg).Foreground(bg)
+			}
+
+			// Draw the character.
+			var comb []rune
+			if len(runeSequence) > 1 {
+				// Allocate space for the combining characters only when necessary.
+				comb = make([]rune, len(runeSequence)-1)
+				copy(comb, runeSequence[1:])
+			}
+			for offset := 0; offset < runeSeqWidth; offset++ {
+				screen.SetContent(x+posX+offset, y+line-t.lineOffset, runeSequence[0], comb, style)
+			}
+
+			// Advance.
+			posX += runeSeqWidth
+			runeSequence = runeSequence[:0]
+			runeSeqWidth = 0
+		}
 		for pos, ch := range text {
 			// Get the color.
 			if currentTag < len(colorTags) && pos >= colorTagIndices[currentTag][0] && pos < colorTagIndices[currentTag][1] {
+				flush()
 				if pos == colorTagIndices[currentTag][1]-1 {
-					color = tcell.GetColor(colorTags[currentTag][1])
+					foregroundColor, backgroundColor, attributes = styleFromTag(foregroundColor, backgroundColor, attributes, colorTags[currentTag])
 					currentTag++
 				}
 				continue
@@ -778,6 +842,7 @@ func (t *TextView) Draw(screen tcell.Screen) {
 
 			// Get the region.
 			if currentRegion < len(regionIndices) && pos >= regionIndices[currentRegion][0] && pos < regionIndices[currentRegion][1] {
+				flush()
 				if pos == regionIndices[currentRegion][1]-1 {
 					regionID = regions[currentRegion][1]
 					currentRegion++
@@ -787,6 +852,7 @@ func (t *TextView) Draw(screen tcell.Screen) {
 
 			// Skip the second-to-last character of an escape tag.
 			if currentEscapeTag < len(escapeIndices) && pos >= escapeIndices[currentEscapeTag][0] && pos < escapeIndices[currentEscapeTag][1] {
+				flush()
 				if pos == escapeIndices[currentEscapeTag][1]-1 {
 					currentEscapeTag++
 				} else if pos == escapeIndices[currentEscapeTag][1]-2 {
@@ -797,7 +863,14 @@ func (t *TextView) Draw(screen tcell.Screen) {
 			// Determine the width of this rune.
 			chWidth := runewidth.RuneWidth(ch)
 			if chWidth == 0 {
-				continue
+				// If this is not a modifier, we treat it as a space character.
+				if len(runeSequence) == 0 {
+					ch = ' '
+					chWidth = 1
+				} else {
+					runeSequence = append(runeSequence, ch)
+					continue
+				}
 			}
 
 			// Skip to the right.
@@ -807,25 +880,19 @@ func (t *TextView) Draw(screen tcell.Screen) {
 			}
 
 			// Stop at the right border.
-			if posX+chWidth > width {
+			if posX+runeSeqWidth+chWidth > width {
 				break
 			}
 
-			// Do we highlight this character?
-			style := tcell.StyleDefault.Background(t.backgroundColor).Foreground(color)
-			if len(regionID) > 0 {
-				if _, ok := t.highlights[regionID]; ok {
-					style = tcell.StyleDefault.Background(color).Foreground(t.backgroundColor)
-				}
-			}
+			// Flush the rune sequence.
+			flush()
 
-			// Draw the character.
-			for offset := 0; offset < chWidth; offset++ {
-				screen.SetContent(x+posX+offset, y+line-t.lineOffset, ch, nil, style)
-			}
-
-			// Advance.
-			posX += chWidth
+			// Queue this rune.
+			runeSequence = append(runeSequence, ch)
+			runeSeqWidth += chWidth
+		}
+		if posX+runeSeqWidth <= width {
+			flush()
 		}
 	}
 
@@ -839,7 +906,7 @@ func (t *TextView) Draw(screen tcell.Screen) {
 
 // InputHandler returns the handler for this primitive.
 func (t *TextView) InputHandler() func(event *tcell.EventKey, setFocus func(p Primitive)) {
-	return t.wrapInputHandler(func(event *tcell.EventKey, setFocus func(p Primitive)) {
+	return t.WrapInputHandler(func(event *tcell.EventKey, setFocus func(p Primitive)) {
 		key := event.Key()
 
 		if key == tcell.KeyEscape || key == tcell.KeyEnter || key == tcell.KeyTab || key == tcell.KeyBacktab {

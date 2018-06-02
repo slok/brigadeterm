@@ -1,6 +1,8 @@
 package tview
 
 import (
+	"fmt"
+	"os"
 	"sync"
 
 	"github.com/gdamore/tcell"
@@ -38,6 +40,9 @@ type Application struct {
 	// An optional callback function which is invoked after the root primitive
 	// was drawn.
 	afterDraw func(screen tcell.Screen)
+
+	// If this value is true, the application has entered suspended mode.
+	suspended bool
 }
 
 // NewApplication creates and returns a new application.
@@ -57,6 +62,12 @@ func NewApplication() *Application {
 func (a *Application) SetInputCapture(capture func(event *tcell.EventKey) *tcell.EventKey) *Application {
 	a.inputCapture = capture
 	return a
+}
+
+// GetInputCapture returns the function installed with SetInputCapture() or nil
+// if no such function has been installed.
+func (a *Application) GetInputCapture() func(event *tcell.EventKey) *tcell.EventKey {
+	return a.inputCapture
 }
 
 // Run starts the application and thus the event loop. This function returns
@@ -92,9 +103,12 @@ func (a *Application) Run() error {
 
 	// Start event loop.
 	for {
-		a.RLock()
+		a.Lock()
 		screen := a.screen
-		a.RUnlock()
+		if a.suspended {
+			a.suspended = false // Clear previous suspended flag.
+		}
+		a.Unlock()
 		if screen == nil {
 			break
 		}
@@ -102,7 +116,17 @@ func (a *Application) Run() error {
 		// Wait for next event.
 		event := a.screen.PollEvent()
 		if event == nil {
-			break // The screen was finalized.
+			a.Lock()
+			if a.suspended {
+				// This screen was renewed due to suspended mode.
+				a.suspended = false
+				a.Unlock()
+				continue // Resume.
+			}
+			a.Unlock()
+
+			// The screen was finalized. Exit the loop.
+			break
 		}
 
 		switch event := event.(type) {
@@ -154,6 +178,57 @@ func (a *Application) Stop() {
 	}
 	a.screen.Fini()
 	a.screen = nil
+}
+
+// Suspend temporarily suspends the application by exiting terminal UI mode and
+// invoking the provided function "f". When "f" returns, terminal UI mode is
+// entered again and the application resumes.
+//
+// A return value of true indicates that the application was suspended and "f"
+// was called. If false is returned, the application was already suspended,
+// terminal UI mode was not exited, and "f" was not called.
+func (a *Application) Suspend(f func()) bool {
+	a.Lock()
+
+	if a.suspended || a.screen == nil {
+		// Application is already suspended.
+		a.Unlock()
+		return false
+	}
+
+	// Enter suspended mode.
+	a.suspended = true
+	a.Unlock()
+	a.Stop()
+
+	// Deal with panics during suspended mode. Exit the program.
+	defer func() {
+		if p := recover(); p != nil {
+			fmt.Println(p)
+			os.Exit(1)
+		}
+	}()
+
+	// Wait for "f" to return.
+	f()
+
+	// Make a new screen and redraw.
+	a.Lock()
+	var err error
+	a.screen, err = tcell.NewScreen()
+	if err != nil {
+		a.Unlock()
+		panic(err)
+	}
+	if err = a.screen.Init(); err != nil {
+		a.Unlock()
+		panic(err)
+	}
+	a.Unlock()
+	a.Draw()
+
+	// Continue application loop.
+	return true
 }
 
 // Draw refreshes the screen. It calls the Draw() function of the application's
@@ -214,6 +289,12 @@ func (a *Application) SetBeforeDrawFunc(handler func(screen tcell.Screen) bool) 
 	return a
 }
 
+// GetBeforeDrawFunc returns the callback function installed with
+// SetBeforeDrawFunc() or nil if none has been installed.
+func (a *Application) GetBeforeDrawFunc() func(screen tcell.Screen) bool {
+	return a.beforeDraw
+}
+
 // SetAfterDrawFunc installs a callback function which is invoked after the root
 // primitive was drawn during screen updates.
 //
@@ -221,6 +302,12 @@ func (a *Application) SetBeforeDrawFunc(handler func(screen tcell.Screen) bool) 
 func (a *Application) SetAfterDrawFunc(handler func(screen tcell.Screen)) *Application {
 	a.afterDraw = handler
 	return a
+}
+
+// GetAfterDrawFunc returns the callback function installed with
+// SetAfterDrawFunc() or nil if none has been installed.
+func (a *Application) GetAfterDrawFunc() func(screen tcell.Screen) {
+	return a.afterDraw
 }
 
 // SetRoot sets the root primitive for this application. If "fullscreen" is set
@@ -270,9 +357,11 @@ func (a *Application) SetFocus(p Primitive) *Application {
 		a.screen.HideCursor()
 	}
 	a.Unlock()
-	p.Focus(func(p Primitive) {
-		a.SetFocus(p)
-	})
+	if p != nil {
+		p.Focus(func(p Primitive) {
+			a.SetFocus(p)
+		})
+	}
 
 	return a
 }

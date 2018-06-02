@@ -186,7 +186,7 @@
   branch = "master"
   name = "github.com/rivo/tview"
   packages = ["."]
-  revision = "c2f07f95484c7bead2bac61de12030815e2aab58"
+  revision = "71ecf1f4299c6d72b16d20da72405b7e85ac8720"
 
 [[projects]]
   name = "github.com/spf13/pflag"

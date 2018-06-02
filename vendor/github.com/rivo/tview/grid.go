@@ -59,9 +59,16 @@ type Grid struct {
 }
 
 // NewGrid returns a new grid-based layout container with no initial primitives.
+//
+// Note that Box, the superclass of Grid, will have its background color set to
+// transparent so that any grid areas not covered by any primitives will leave
+// their background unchanged. To clear a Grid's background before any items are
+// drawn, set it to the desired color:
+//
+//   grid.SetBackgroundColor(tview.Styles.PrimitiveBackgroundColor)
 func NewGrid() *Grid {
 	g := &Grid{
-		Box:          NewBox(),
+		Box:          NewBox().SetBackgroundColor(tcell.ColorDefault),
 		bordersColor: Styles.GraphicsColor,
 	}
 	g.focus = g
@@ -258,12 +265,12 @@ func (g *Grid) HasFocus() bool {
 			return true
 		}
 	}
-	return false
+	return g.hasFocus
 }
 
 // InputHandler returns the handler for this primitive.
 func (g *Grid) InputHandler() func(event *tcell.EventKey, setFocus func(p Primitive)) {
-	return g.wrapInputHandler(func(event *tcell.EventKey, setFocus func(p Primitive)) {
+	return g.WrapInputHandler(func(event *tcell.EventKey, setFocus func(p Primitive)) {
 		switch event.Key() {
 		case tcell.KeyRune:
 			switch event.Rune() {
