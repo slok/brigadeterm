@@ -2,13 +2,29 @@
 
 Brigadeterm is a text based dashboard for [Brigade][brigade-url] pipeline system.
 
+## Download
+
+Download the binary from [releases][releases-url].
+
+## Features
+
+### Project summary with latest builds
+
 ![projects](screenshots/brigadeterm-latest-builds.gif)
-![pipelines](screenshots/jobs2.png)
+
+### Versioned build status timeline
+
 ![builds](screenshots/builds.png)
 
-## Run
+### Pipeline summary with job status
 
-First you need to download the binary from [releases][releases-url].
+![pipelines](screenshots/jobs2.png)
+
+### Realtime streamed logs per job
+
+[![joblog](https://asciinema.org/a/bbxYe3EYrUZMdCDKbu8Ol4M7G.png)](https://asciinema.org/a/bbxYe3EYrUZMdCDKbu8Ol4M7G)
+
+## Run
 
 Brigadeterm uses kubectl configuration, so you need access to the cluster using kubectl.
 
