@@ -1,7 +1,10 @@
 package controller
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"time"
 
 	azurebrigade "github.com/Azure/brigade/pkg/brigade"
@@ -25,6 +28,8 @@ type Controller interface {
 	BuildJobListPageContext(buildID string) *BuildJobListPageContext
 	// JobLogPageContext returns the JobLogPage context.
 	JobLogPageContext(jobID string) *JobLogPageContext
+	// JobRunning returns if the job is running or finished.
+	JobRunning(jobID string) bool
 }
 
 type controller struct {
@@ -131,17 +136,44 @@ func (c *controller) JobLogPageContext(jobID string) *JobLogPageContext {
 		}
 	}
 
-	log, err := c.brigade.GetJobLog(jobID)
+	var logStrm io.ReadCloser
+
+	// If the job is running then get a stream of logs.
+	if c.transformState(job.Status) == RunningState {
+		logStrm, err = c.brigade.GetJobLogStream(jobID)
+	} else {
+		logStrm, err = c.brigade.GetJobLog(jobID)
+	}
+
 	if err != nil {
 		return &JobLogPageContext{
 			Error: fmt.Errorf("there was an error while getting %s job log: %s", jobID, err),
 		}
 	}
 
+	// Set a dummy ReadCloser for safety reads on the variable.
+	if logStrm == nil {
+		logStrm = ioutil.NopCloser(new(bytes.Buffer))
+	}
+
 	return &JobLogPageContext{
 		Job: c.transformJob(job),
-		Log: []byte(log),
+		Log: logStrm,
 	}
+}
+
+func (c *controller) JobRunning(jobID string) bool {
+	job, err := c.brigade.GetJob(jobID)
+	// If error assume the job is not running or doesn't exist so it's finished.
+	if err != nil {
+		return false
+	}
+
+	if c.transformState(job.Status) == RunningState {
+		return true
+	}
+
+	return false
 }
 
 func (c *controller) transformBuild(b *brigademodel.Build) *Build {

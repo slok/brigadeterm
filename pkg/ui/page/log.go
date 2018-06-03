@@ -2,7 +2,9 @@ package page
 
 import (
 	"fmt"
+	"io"
 	"sync"
+	"time"
 
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
@@ -12,6 +14,10 @@ import (
 const (
 	// JobLogPageName is the name that identifies the JobLogPage page.
 	JobLogPageName = "joblog"
+
+	// When streaming, check the job status every N interval to know when the job has finished
+	// and we need to reload (closing the stream).
+	jobStatusCheckInterval = 5 * time.Second
 )
 
 const (
@@ -27,6 +33,7 @@ const (
 type JobLog struct {
 	controller controller.Controller
 	router     *Router
+	app        *tview.Application
 
 	// page layout.
 	layout tview.Primitive
@@ -36,14 +43,21 @@ type JobLog struct {
 	logBox   *tview.TextView
 	usage    *tview.TextView
 
+	// stopStreaming is the way we will stop streaming the previous stream on the textview. If we don't stop
+	// multiple writes from different goroutines will be writing to the textview.
+	stopStreaming chan struct{}
+	// canStream is used when we are ready to stream again (previous stream finished).
+	canStream chan struct{}
+
 	registerPageOnce sync.Once
 }
 
 // NewJobLog returns a new JobLog.
-func NewJobLog(controller controller.Controller, router *Router) *JobLog {
+func NewJobLog(controller controller.Controller, app *tview.Application, router *Router) *JobLog {
 	j := &JobLog{
 		controller: controller,
 		router:     router,
+		app:        app,
 	}
 	j.createComponents()
 	return j
@@ -57,7 +71,9 @@ func (j *JobLog) createComponents() {
 		SetBorderColor(tcell.ColorYellow)
 
 	j.logBox = tview.NewTextView().
-		SetDynamicColors(true)
+		SetDynamicColors(true).SetChangedFunc(func() {
+		j.app.Draw()
+	})
 	j.logBox.SetBorder(true).
 		SetTitle("Log")
 
@@ -86,9 +102,10 @@ func (j *JobLog) BeforeLoad() {
 
 // Refresh will refresh all the page data.
 func (j *JobLog) Refresh(projectID, buildID, jobID string) {
-	// TODO: Get context.
 	ctx := j.controller.JobLogPageContext(jobID)
-	j.fill(ctx)
+
+	// Everything seems ok, fill everything.
+	j.fill(ctx, projectID, buildID)
 
 	// Set key handlers.
 	j.logBox.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -117,10 +134,16 @@ func (j *JobLog) Refresh(projectID, buildID, jobID string) {
 	})
 }
 
-func (j *JobLog) fill(ctx *controller.JobLogPageContext) {
+func (j *JobLog) fill(ctx *controller.JobLogPageContext, projectID, buildID string) {
+	// If not ready to show he logs go back.
+	if ctx.Job == nil {
+		j.router.LoadBuildJobList(projectID, buildID)
+		return
+	}
+
 	j.fillUsage()
 	j.fillBuildInfo(ctx)
-	j.fillLog(ctx.Log)
+	j.fillLog(ctx, projectID, buildID)
 }
 
 func (j *JobLog) fillUsage() {
@@ -148,7 +171,95 @@ func (j *JobLog) fillBuildInfo(ctx *controller.JobLogPageContext) {
 	j.jobsInfo.SetText(info)
 }
 
-func (j *JobLog) fillLog(data []byte) {
+func (j *JobLog) fillLog(ctx *controller.JobLogPageContext, projectID, buildID string) {
+	// There are no concurrent fillLog calls, one cli per app run, it's safe to not use mutexes or channels
+	// to guarantee accesses.
+
+	// Are we already streaming on background from a previous stream?
+	// If yes close the stream and set to initial state.
+	if j.stopStreaming != nil {
+		close(j.stopStreaming)
+		j.stopStreaming = nil
+	}
+
+	// Are we ready to stream again? Wait if we have the canStream channel set
+	// This channel will be closed when the streaming goroutine that is already
+	// streaming has received the stop streaming call.
+	if j.canStream != nil {
+		<-j.canStream
+	}
+
+	// Clean the textview before starting the new stream.
 	j.logBox.Clear()
-	j.logBox.SetText(string(data))
+
+	// Check if we need streaming logic or is just a plain readcloser with all the logs.
+	if ctx.Job.State != controller.RunningState {
+		defer ctx.Log.Close()
+		io.Copy(j.logBox, ctx.Log)
+		return
+	}
+
+	// Start streaming in background (will update the textview
+	// and the textview will redraw on every change detected, check
+	// `SetChangedFunc` on the textview).
+	go j.streamLog(ctx, projectID, buildID)
 }
+
+func (j *JobLog) streamLog(ctx *controller.JobLogPageContext, projectID, buildID string) {
+	// Initialize control channels for the streaming.
+	j.stopStreaming = make(chan struct{})
+	j.canStream = make(chan struct{})
+
+	// Save the context on goroutine.
+	ss := j.stopStreaming
+	cs := j.canStream
+	l := ctx.Log
+
+	// Close our reader when finished streaming, ignore if error.
+	defer l.Close()
+
+	// When finished we are ready to stream again. Only one can stream at a time.
+	defer func() {
+		close(cs)
+		cs = nil
+	}()
+
+	// Run a goroutine to check the state of the job on inteval N.
+	// If job finished we could reload everything and stop our streaming.
+	go func() {
+		t := time.NewTicker(jobStatusCheckInterval)
+		defer t.Stop()
+		for range t.C {
+			// Check if another streaming has been started before finishing this
+			// and we need to stop checking this job status.
+			select {
+			case <-ss:
+				return
+			default:
+			}
+
+			// If not running is time to reload everything.
+			if !j.controller.JobRunning(ctx.Job.ID) {
+				j.Refresh(projectID, buildID, ctx.Job.ID)
+				return
+			}
+		}
+	}()
+
+	// Start showing the stream on the textView.
+	// Ignore the copy error.
+	io.Copy(j.logBox, readerFunc(func(p []byte) (n int, err error) {
+		select {
+		// if we don't want to continue reading return 0.
+		case <-ss:
+			return 0, io.EOF
+		default: // Fallback to read.
+			return l.Read(p)
+		}
+	}))
+}
+
+// helper type to create a reader from a func.
+type readerFunc func(p []byte) (n int, err error)
+
+func (r readerFunc) Read(p []byte) (n int, err error) { return r(p) }

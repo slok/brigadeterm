@@ -7,6 +7,7 @@ import (
 
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
+
 	"github.com/slok/brigadeterm/pkg/controller"
 )
 
@@ -28,6 +29,7 @@ const (
 type BuildJobList struct {
 	controller controller.Controller
 	router     *Router
+	app        *tview.Application
 
 	// page layout.
 	layout tview.Primitive
@@ -41,10 +43,11 @@ type BuildJobList struct {
 }
 
 // NewBuildJobList returns a new BuildJobList.
-func NewBuildJobList(controller controller.Controller, router *Router) *BuildJobList {
+func NewBuildJobList(controller controller.Controller, app *tview.Application, router *Router) *BuildJobList {
 	b := &BuildJobList{
 		controller: controller,
 		router:     router,
+		app:        app,
 	}
 	b.createComponents()
 	return b

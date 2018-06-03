@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"io"
 	"time"
 )
 
@@ -77,6 +78,6 @@ type BuildJobListPageContext struct {
 // render a job log page.
 type JobLogPageContext struct {
 	Job   *Job
-	Log   []byte
+	Log   io.ReadCloser
 	Error error
 }

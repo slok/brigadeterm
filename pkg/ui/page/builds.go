@@ -7,6 +7,7 @@ import (
 
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
+
 	"github.com/slok/brigadeterm/pkg/controller"
 )
 
@@ -26,6 +27,7 @@ const (
 type ProjectBuildList struct {
 	controller controller.Controller
 	router     *Router
+	app        *tview.Application
 
 	// page layout
 	layout tview.Primitive
@@ -39,10 +41,11 @@ type ProjectBuildList struct {
 }
 
 // NewProjectBuildList returns a new ProjectBuildList.
-func NewProjectBuildList(controller controller.Controller, router *Router) *ProjectBuildList {
+func NewProjectBuildList(controller controller.Controller, app *tview.Application, router *Router) *ProjectBuildList {
 	p := &ProjectBuildList{
 		controller: controller,
 		router:     router,
+		app:        app,
 	}
 	p.createComponents()
 	return p
