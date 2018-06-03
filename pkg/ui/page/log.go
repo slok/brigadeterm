@@ -102,8 +102,9 @@ func (j *JobLog) BeforeLoad() {
 
 // Refresh will refresh all the page data.
 func (j *JobLog) Refresh(projectID, buildID, jobID string) {
-	// TODO: Get context.
 	ctx := j.controller.JobLogPageContext(jobID)
+
+	// Everything seems ok, fill everything.
 	j.fill(ctx, projectID, buildID)
 
 	// Set key handlers.
@@ -134,6 +135,12 @@ func (j *JobLog) Refresh(projectID, buildID, jobID string) {
 }
 
 func (j *JobLog) fill(ctx *controller.JobLogPageContext, projectID, buildID string) {
+	// If not ready to show he logs go back.
+	if ctx.Job == nil {
+		j.router.LoadBuildJobList(projectID, buildID)
+		return
+	}
+
 	j.fillUsage()
 	j.fillBuildInfo(ctx)
 	j.fillLog(ctx, projectID, buildID)
