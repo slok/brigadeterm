@@ -164,7 +164,7 @@ func (c *controller) JobLogPageContext(jobID string) *JobLogPageContext {
 
 func (c *controller) JobRunning(jobID string) bool {
 	job, err := c.brigade.GetJob(jobID)
-	// If error assume the job is not running or doesn't exist so it's finished
+	// If error assume the job is not running or doesn't exist so it's finished.
 	if err != nil {
 		return false
 	}

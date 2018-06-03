@@ -43,10 +43,10 @@ type JobLog struct {
 	logBox   *tview.TextView
 	usage    *tview.TextView
 
-	// stopLog is the way we will stop streaming the previous stream on the textview. If we don't stop
+	// stopStreaming is the way we will stop streaming the previous stream on the textview. If we don't stop
 	// multiple writes from different goroutines will be writing to the textview.
 	stopStreaming chan struct{}
-	// canLog is used when we are ready to stream again (previous stream finished).
+	// canStream is used when we are ready to stream again (previous stream finished).
 	canStream chan struct{}
 
 	registerPageOnce sync.Once
