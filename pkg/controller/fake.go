@@ -338,7 +338,7 @@ func (f *fake) JobLogPageContext(jobID string) *JobLogPageContext {
 }
 
 func (f *fake) JobRunning(jobID string) bool {
-	// If we have been getting the logs for more than 1m then mark as ended.
+	// If we have been getting the logs for more than 20s then mark as ended.
 	if time.Now().Sub(f.jobLogAskedFirstTime) > (20 * time.Second) {
 		f.jobFinished = true
 		return false

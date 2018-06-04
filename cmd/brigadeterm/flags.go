@@ -1,16 +1,16 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 
+	"gopkg.in/alecthomas/kingpin.v2"
 	"k8s.io/client-go/util/homedir"
 )
 
 type cmdFlags struct {
-	fs               *flag.FlagSet
+	app              *kingpin.Application
 	kubeConfig       string
 	kubeContext      string
 	brigadeNamespace string
@@ -19,7 +19,7 @@ type cmdFlags struct {
 
 func newCmdFlags() (*cmdFlags, error) {
 	fls := &cmdFlags{
-		fs: flag.NewFlagSet(os.Args[0], flag.ExitOnError),
+		app: kingpin.New(filepath.Base(os.Args[0]), ""),
 	}
 	err := fls.init()
 
@@ -33,13 +33,13 @@ func (c *cmdFlags) init() error {
 	}
 
 	// register flags
-	c.fs.StringVar(&c.kubeConfig, "kubeconfig", kubehome, "Kubernetes configuration path, only used when development mode enabled")
-	c.fs.StringVar(&c.brigadeNamespace, "namespace", "default", "Kubernetes namespace where brigade is running")
-	c.fs.StringVar(&c.kubeContext, "context", "", "Kubernetes context to use. Default to current context configured in kubeconfig")
-	c.fs.BoolVar(&c.showVersion, "version", false, "Show app version")
+	c.app.Flag("kubeconfig", "Kubernetes configuration path").Default(kubehome).StringVar(&c.kubeConfig)
+	c.app.Flag("namespace", "Kubernetes namespace where brigade is running").Short('n').Default("default").StringVar(&c.brigadeNamespace)
+	c.app.Flag("context", "Kubernetes context to use. Default to current context configured in kubeconfig").Short('c').Default("").StringVar(&c.kubeContext)
+	c.app.Flag("version", "Show app version").Short('v').BoolVar(&c.showVersion)
 
 	// Parse flags
-	if err := c.fs.Parse(os.Args[1:]); err != nil {
+	if _, err := c.app.Parse(os.Args[1:]); err != nil {
 		return err
 	}
 
