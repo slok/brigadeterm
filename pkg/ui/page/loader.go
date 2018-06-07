@@ -28,9 +28,9 @@ func NewLoader(reloadInterval time.Duration, app *tview.Application) *Loader {
 	return l
 }
 
-// loadPage will ensure only one route is loaded at a time. Also ensures
-// that the pages that can autoreload can do it.
-func (l *Loader) loadPage(allowAutoreload bool, f func()) {
+// LoadPage will ensure only one route is loaded at a time. Also ensures
+// that the pages that can autoreload do it if it is required.
+func (l *Loader) LoadPage(allowAutoreload bool, f func()) {
 	if l.getAutoreloading() {
 		// If already reloading stop the previous reload and wait.
 		l.stopReloading <- struct{}{}
@@ -46,7 +46,6 @@ func (l *Loader) loadPage(allowAutoreload bool, f func()) {
 	if allowAutoreload && l.reloadInterval > 0 {
 		l.setAutoreloading(true)
 		go l.autoreload(f)
-
 	}
 }
 
@@ -57,7 +56,6 @@ func (l *Loader) autoreload(f func()) {
 		l.canLoad <- struct{}{}
 	}()
 
-	// Wait until something we need to autoreload.
 	t := time.NewTicker(l.reloadInterval)
 	defer t.Stop()
 	for {

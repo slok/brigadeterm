@@ -53,7 +53,7 @@ func (r *Router) register() {
 
 // LoadProjectList will set the ui on the project list.
 func (r *Router) LoadProjectList() {
-	r.loader.loadPage(true, func() {
+	r.loader.LoadPage(true, func() {
 		r.projectListPage.BeforeLoad()
 		r.pages.SwitchToPage(ProjectListPageName)
 		r.projectListPage.Refresh()
@@ -62,7 +62,7 @@ func (r *Router) LoadProjectList() {
 
 // LoadProjectBuildList will set the ui on the project build list.
 func (r *Router) LoadProjectBuildList(projectID string) {
-	r.loader.loadPage(true, func() {
+	r.loader.LoadPage(true, func() {
 		r.projectBuildListPage.BeforeLoad()
 		r.pages.SwitchToPage(ProjectBuildListPageName)
 		r.projectBuildListPage.Refresh(projectID)
@@ -71,7 +71,7 @@ func (r *Router) LoadProjectBuildList(projectID string) {
 
 // LoadBuildJobList will set the ui on the build job list.
 func (r *Router) LoadBuildJobList(projectID, buildID string) {
-	r.loader.loadPage(true, func() {
+	r.loader.LoadPage(true, func() {
 		r.buildJobListPage.BeforeLoad()
 		r.pages.SwitchToPage(BuildJobListPageName)
 		r.buildJobListPage.Refresh(projectID, buildID)
@@ -80,7 +80,7 @@ func (r *Router) LoadBuildJobList(projectID, buildID string) {
 
 // LoadJobLog will set the ui on the build job log.
 func (r *Router) LoadJobLog(projectID, buildID, jobID string) {
-	r.loader.loadPage(false, func() {
+	r.loader.LoadPage(false, func() {
 		r.jobLogPage.BeforeLoad()
 		r.pages.SwitchToPage(JobLogPageName)
 		r.jobLogPage.Refresh(projectID, buildID, jobID)
