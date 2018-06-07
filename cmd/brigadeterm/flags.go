@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"gopkg.in/alecthomas/kingpin.v2"
 	"k8s.io/client-go/util/homedir"
@@ -15,6 +16,7 @@ type cmdFlags struct {
 	kubeContext      string
 	brigadeNamespace string
 	showVersion      bool
+	reloadInterval   time.Duration
 }
 
 func newCmdFlags() (*cmdFlags, error) {
@@ -35,6 +37,7 @@ func (c *cmdFlags) init() error {
 	// register flags
 	c.app.Flag("kubeconfig", "Kubernetes configuration path").Default(kubehome).StringVar(&c.kubeConfig)
 	c.app.Flag("namespace", "Kubernetes namespace where brigade is running").Short('n').Default("default").StringVar(&c.brigadeNamespace)
+	c.app.Flag("reload-interval", "The interval the UI will autoreload").Short('r').Default("3s").DurationVar(&c.reloadInterval)
 	c.app.Flag("context", "Kubernetes context to use. Default to current context configured in kubeconfig").Short('c').Default("").StringVar(&c.kubeContext)
 	c.app.Flag("version", "Show app version").Short('v').BoolVar(&c.showVersion)
 
