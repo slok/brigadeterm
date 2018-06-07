@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"sync"
+	"time"
 
 	"github.com/rivo/tview"
 
@@ -16,19 +16,20 @@ type Renderer interface {
 
 // Index will compose index window.
 type Index struct {
-	app               *tview.Application
-	layout            *tview.Flex
-	controller        controller.Controller
-	router            *page.Router
-	registerPagesOnce sync.Once
+	app            *tview.Application
+	layout         *tview.Flex
+	controller     controller.Controller
+	router         *page.Router
+	reloadInterval time.Duration
 }
 
 // NewIndex returns a new index renderer.
-func NewIndex(controller controller.Controller, app *tview.Application) *Index {
+func NewIndex(reloadInterval time.Duration, controller controller.Controller, app *tview.Application) *Index {
 	// TODO: use brigade service.
 	i := &Index{
-		app:        app,
-		controller: controller,
+		app:            app,
+		controller:     controller,
+		reloadInterval: reloadInterval,
 	}
 
 	i.createLayout()
@@ -39,8 +40,11 @@ func (i *Index) createPages() *tview.Pages {
 	// Create the tui pages.
 	pages := tview.NewPages()
 
+	// Create the loader, this knows how to load/autoreload pages.
+	loader := page.NewLoader(i.reloadInterval, i.app)
+
 	// Create the page router (also creates and registers the pages on the page ui container).
-	i.router = page.NewRouter(i.app, i.controller, pages)
+	i.router = page.NewRouter(i.app, loader, i.controller, pages)
 
 	return pages
 }
