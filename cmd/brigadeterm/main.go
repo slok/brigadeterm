@@ -64,7 +64,7 @@ func (m *Main) Run() error {
 	// Create the terminal app.
 	app := tview.NewApplication()
 
-	index := ui.NewIndex(uictrl, app)
+	index := ui.NewIndex(m.flags.reloadInterval, uictrl, app)
 
 	return index.Render()
 }
