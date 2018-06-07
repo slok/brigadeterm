@@ -136,23 +136,40 @@ func (s *service) GetProjectBuilds(project *brigademodel.Project, desc bool) ([]
 		res[i] = &bl
 	}
 
-	// Order builds in descending order (last ones first).
-	sort.Slice(res, func(i, j int) bool {
-		// If no data move at the end of the list.
-		if res[i].Worker == nil || res[j].Worker == nil {
-			if desc {
-				return true
-			}
-			return false
-		}
-
-		if desc {
-			return res[i].Worker.StartTime.After(res[j].Worker.StartTime)
-		}
-		return res[i].Worker.StartTime.Before(res[j].Worker.StartTime)
+	// TODO: Should we improve the sorting algorithm?
+	// Make a first sort by ID so in equality of time always is the same order on every case.
+	// Doesn't matter the order at all is for consistency when start time is the same.
+	sort.SliceStable(res, func(i, j int) bool {
+		return res[i].ID < res[j].ID
 	})
 
-	return res, nil
+	// Split phantom jobs and builds.
+	phantomBs := []*brigademodel.Build{}
+	goodBs := []*brigademodel.Build{}
+	for _, b := range res {
+		b := b
+		if b.Worker == nil {
+			phantomBs = append(phantomBs, b)
+		} else {
+			goodBs = append(goodBs, b)
+		}
+	}
+
+	// Order builds in descending order (last ones first).
+	sort.SliceStable(goodBs, func(i, j int) bool {
+		if desc {
+			return goodBs[i].Worker.StartTime.After(goodBs[j].Worker.StartTime)
+		}
+		return goodBs[i].Worker.StartTime.Before(goodBs[j].Worker.StartTime)
+	})
+
+	// Append phantom to the end.
+	for _, pb := range phantomBs {
+		pb := pb
+		goodBs = append(goodBs, pb)
+	}
+
+	return goodBs, nil
 }
 
 // GetBuildJobs satisfies Service interface.
@@ -172,13 +189,19 @@ func (s *service) GetBuildJobs(BuildID string, desc bool) ([]*brigademodel.Job, 
 		res[i] = &j
 	}
 
+	// TODO: Should we improve the sorting algorithm?
+	// Make a first sort by ID so in equality of time always is the same order on every case.
+	// Doesn't matter the order at all is for consistency when start time is the same.
+	sort.SliceStable(res, func(i, j int) bool {
+		return res[i].ID < res[j].ID
+	})
+
 	// Order jobs in ascending order (first ones first).
-	sort.Slice(res, func(i, j int) bool {
+	sort.SliceStable(res, func(i, j int) bool {
 		if desc {
 			return res[i].StartTime.After(res[j].StartTime)
 		}
 		return res[i].StartTime.Before(res[j].StartTime)
-
 	})
 
 	return res, nil
