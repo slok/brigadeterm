@@ -214,7 +214,7 @@ func (b *BuildJobList) fillJobsList(projectID, buildID string, ctx *controller.B
 	b.jobsList.SetCell(0, 1, &tview.TableCell{Text: "Name", Align: tview.AlignCenter, Color: tcell.ColorYellow})
 	b.jobsList.SetCell(0, 2, &tview.TableCell{Text: "Image", Align: tview.AlignCenter, Color: tcell.ColorYellow})
 	b.jobsList.SetCell(0, 3, &tview.TableCell{Text: "ID", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	b.jobsList.SetCell(0, 4, &tview.TableCell{Text: "Started", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	b.jobsList.SetCell(0, 4, &tview.TableCell{Text: "Ended", Align: tview.AlignCenter, Color: tcell.ColorYellow})
 	b.jobsList.SetCell(0, 5, &tview.TableCell{Text: "Duration", Align: tview.AlignCenter, Color: tcell.ColorYellow})
 
 	// TODO order by time.
