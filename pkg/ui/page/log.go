@@ -194,8 +194,8 @@ func (j *JobLog) fillLog(ctx *controller.JobLogPageContext, projectID, buildID s
 
 	// Check if we need streaming logic or is just a plain readcloser with all the logs.
 	if ctx.Job.State != controller.RunningState {
+		j.copyWithAnsiiColors(j.logBox, ctx.Log)
 		defer ctx.Log.Close()
-		io.Copy(j.logBox, ctx.Log)
 		return
 	}
 
@@ -248,7 +248,7 @@ func (j *JobLog) streamLog(ctx *controller.JobLogPageContext, projectID, buildID
 
 	// Start showing the stream on the textView.
 	// Ignore the copy error.
-	io.Copy(j.logBox, readerFunc(func(p []byte) (n int, err error) {
+	j.copyWithAnsiiColors(j.logBox, readerFunc(func(p []byte) (n int, err error) {
 		select {
 		// if we don't want to continue reading return 0.
 		case <-ss:
@@ -263,3 +263,8 @@ func (j *JobLog) streamLog(ctx *controller.JobLogPageContext, projectID, buildID
 type readerFunc func(p []byte) (n int, err error)
 
 func (r readerFunc) Read(p []byte) (n int, err error) { return r(p) }
+
+func (j *JobLog) copyWithAnsiiColors(w io.Writer, r io.Reader) {
+	cw := tview.ANSIIWriter(w)
+	io.Copy(cw, r)
+}
