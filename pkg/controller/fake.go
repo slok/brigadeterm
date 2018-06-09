@@ -301,7 +301,8 @@ func (f *fake) JobLogPageContext(jobID string) *JobLogPageContext {
 			defer w.Close()
 			linesCnt := 0
 			for {
-				_, err := fmt.Fprintf(w, "---> logline %d --------- %d\n", linesCnt, time.Now().Nanosecond())
+				color := time.Now().Nanosecond() % 7
+				_, err := fmt.Fprintf(w, "---> \x1b[01;3%dmlogline %d --------- %d\n", color, linesCnt, time.Now().Nanosecond())
 				if err != nil {
 					return // Something happenned, we don't mind if it's ended or not, stop.
 				}
@@ -317,7 +318,8 @@ func (f *fake) JobLogPageContext(jobID string) *JobLogPageContext {
 		// Create our fake log.
 		log := ""
 		for i := 0; i < 1000; i++ {
-			log = fmt.Sprintf("%s---> logline %d --------- %d\n", log, i, time.Now().Nanosecond())
+			color := time.Now().Nanosecond() % 7
+			log = fmt.Sprintf("%s---> \x1b[01;3%dmlogline %d --------- %d\n", log, color, i, time.Now().Nanosecond())
 		}
 
 		b := bytes.NewBufferString(log)
