@@ -16,7 +16,8 @@
     "pkg/storage/kube",
     "pkg/storage/kube/apicache"
   ]
-  revision = "e553d3b90d7f6622d81cc3cbd3c5306d4f4fff8b"
+  revision = "c683e76589f89abc1ffafd94595718ab501c2526"
+  version = "v0.15.0"
 
 [[projects]]
   name = "github.com/Azure/go-autorest"
@@ -158,8 +159,8 @@
 [[projects]]
   name = "github.com/json-iterator/go"
   packages = ["."]
-  revision = "3353055b2a1a5ae1b6a8dfde887a524e7088f3a2"
-  version = "1.1.2"
+  revision = "ab8a2e0c74be9d3be70b3184d9acc634935ded82"
+  version = "1.1.4"
 
 [[projects]]
   branch = "master"
@@ -182,8 +183,8 @@
 [[projects]]
   name = "github.com/modern-go/reflect2"
   packages = ["."]
-  revision = "1df9eeb2bb81f327b96228865c5687bc2194af3f"
-  version = "1.0.0"
+  revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
+  version = "1.0.1"
 
 [[projects]]
   name = "github.com/oklog/ulid"
@@ -329,6 +330,7 @@
   version = "v2.1.1"
 
 [[projects]]
+  branch = "release-1.10"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1alpha1",
@@ -360,10 +362,10 @@
     "storage/v1alpha1",
     "storage/v1beta1"
   ]
-  revision = "73d903622b7391f3312dcbac6483fed484e185f8"
-  version = "kubernetes-1.10.0"
+  revision = "0f11257a8a25954878633ebdc9841c67d8f83bdb"
 
 [[projects]]
+  branch = "release-1.10"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -405,8 +407,7 @@
     "pkg/watch",
     "third_party/forked/golang/reflect"
   ]
-  revision = "302974c03f7e50f16561ba237db776ab93594ef6"
-  version = "kubernetes-1.10.0"
+  revision = "e386b2658ed20923da8cc9250e552f082899a1ee"
 
 [[projects]]
   name = "k8s.io/client-go"
@@ -478,6 +479,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0218d9bbd6d7acd497f844c4157e2a0a909b20e608cf6868467365a6a4ff85d6"
+  inputs-digest = "7c7b6cc1640198a84922e551faf914c0300049cdf556346d48d002d60070a048"
   solver-name = "gps-cdcl"
   solver-version = 1
