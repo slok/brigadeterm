@@ -40,6 +40,34 @@ func (_m *Store) CreateBuild(build *brigade.Build) error {
 	return r0
 }
 
+// CreateProject provides a mock function with given fields: proj
+func (_m *Store) CreateProject(proj *brigade.Project) error {
+	ret := _m.Called(proj)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*brigade.Project) error); ok {
+		r0 = rf(proj)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteProject provides a mock function with given fields: id
+func (_m *Store) DeleteProject(id string) error {
+	ret := _m.Called(id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetBuild provides a mock function with given fields: id
 func (_m *Store) GetBuild(id string) (*brigade.Build, error) {
 	ret := _m.Called(id)
