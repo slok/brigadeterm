@@ -1,7 +1,11 @@
+## 0.x.x / 2018-xx-xx
+
+* [BUGFIX] (UI) Fix panic on some windows terminals.
+
 ## 0.5.0 / 2018-07-15
 
 * [ENHANCEMENT] (Brigade) Update to Brigade v0.15.
-* [ENHANCEMENT] (UI) Add ANSII color support on logs.
+* [ENHANCEMENT] (UI) Add ANSI color support on logs.
 
 ## 0.4.2 / 2018-06-07
 
