@@ -182,7 +182,7 @@ func (p *ProjectBuildList) fillBuildList(projectID string, ctx *controller.Proje
 	p.buildsTable.SetSelectedFunc(func(row, column int) {
 		// If the row is the header then don't do anything.
 		if row > 0 {
-			buildID := p.buildsTable.GetCell(row, 3).Text
+			buildID := p.getBuildIDFromTable(row)
 			// Load build job list page.
 			p.router.LoadBuildJobList(projectID, buildID)
 		}
@@ -195,7 +195,11 @@ func (p *ProjectBuildList) rerunBuild() {
 	// If the row is the header then don't do anything.
 	if row > 0 {
 		// Get build id and rerun the build.
-		buildID := p.buildsTable.GetCell(row, 3).Text
+		buildID := p.getBuildIDFromTable(row)
 		p.controller.RerunBuild(buildID)
 	}
+}
+
+func (p *ProjectBuildList) getBuildIDFromTable(row int) string {
+	return p.buildsTable.GetCell(row, 3).Text
 }
