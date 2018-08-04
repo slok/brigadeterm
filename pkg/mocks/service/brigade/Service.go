@@ -216,3 +216,17 @@ func (_m *Service) GetProjects() ([]*brigade.Project, error) {
 
 	return r0, r1
 }
+
+// RerunBuild provides a mock function with given fields: buildID
+func (_m *Service) RerunBuild(buildID string) error {
+	ret := _m.Called(buildID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(buildID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}

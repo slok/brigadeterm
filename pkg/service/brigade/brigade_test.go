@@ -186,3 +186,49 @@ func TestGetBuildJobs(t *testing.T) {
 		})
 	}
 }
+
+func TestRerunBuild(t *testing.T) {
+
+	tests := []struct {
+		name     string
+		build    *azurebrigade.Build
+		expBuild *azurebrigade.Build
+	}{
+		{
+			name: "Rerunning an existing build should rerun the build",
+			build: &azurebrigade.Build{
+				ID:      "01",
+				Script:  []byte("myScipt"),
+				Payload: []byte("myPayload"),
+
+				Worker: &azurebrigade.Worker{
+					StartTime: time.Now(),
+				},
+			},
+
+			expBuild: &azurebrigade.Build{
+				Script:  []byte("myScipt"),
+				Payload: []byte("myPayload"),
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert := assert.New(t)
+
+			// Mocks.
+			ms := &mstore.Store{}
+			ms.On("GetBuild", mock.Anything).Once().Return(test.build, nil)
+			ms.On("CreateBuild", test.expBuild).Once().Return(nil)
+
+			// Create service and run.
+			bsvc := brigade.NewService(ms)
+			err := bsvc.RerunBuild("test")
+
+			if assert.NoError(err) {
+				ms.AssertExpectations(t)
+			}
+		})
+	}
+}
