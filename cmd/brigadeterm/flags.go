@@ -16,6 +16,7 @@ type cmdFlags struct {
 	kubeContext      string
 	brigadeNamespace string
 	showVersion      bool
+	fake             bool
 	reloadInterval   time.Duration
 }
 
@@ -40,6 +41,7 @@ func (c *cmdFlags) init() error {
 	c.app.Flag("reload-interval", "The interval the UI will autoreload").Short('r').Default("3s").DurationVar(&c.reloadInterval)
 	c.app.Flag("context", "Kubernetes context to use. Default to current context configured in kubeconfig").Short('c').Default("").StringVar(&c.kubeContext)
 	c.app.Flag("version", "Show app version").Short('v').BoolVar(&c.showVersion)
+	c.app.Flag("fake", "Run in fake mode").BoolVar(&c.fake)
 
 	// Parse flags
 	if _, err := c.app.Parse(os.Args[1:]); err != nil {
