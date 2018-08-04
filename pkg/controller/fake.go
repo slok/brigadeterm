@@ -13,6 +13,9 @@ var (
 )
 
 type fake struct {
+	// faked builds
+	builds []*Build
+
 	// Track when job log asked for the first time.
 	jobLogAskedFirstTime time.Time
 	jobFinished          bool
@@ -20,7 +23,51 @@ type fake struct {
 
 // NewFakeController returns a new faked controller.
 func NewFakeController() Controller {
-	return &fake{}
+	return &fake{
+		builds: []*Build{
+			&Build{
+				ID:        "lkjdsbfdflkdsnflkjdsbflkjadbflkjaful",
+				Version:   "3140d400028b44f9f21f597b0c4d61f537fc51fc",
+				State:     SuccessedState,
+				EventType: "github:push",
+				Started:   staticNow.Add(-9999 * time.Hour),
+				Ended:     time.Now().Add(-9998 * time.Hour),
+			},
+			&Build{
+				ID:        "flkjdsbfuldflkdsnflkjdsbflkjadbflkja",
+				Version:   "1f537fc5c1f028b44f9f274d3140d40061f59b0c",
+				State:     FailedState,
+				EventType: "deploy",
+				Started:   staticNow.Add(-1 * time.Hour),
+				Ended:     time.Now().Add(-50 * time.Minute),
+			},
+			&Build{
+				ID:        "24351321ldflkds32kjdsbflkj323dbflkja",
+				Version:   "b44f9f21f59b7161f537fc5cf0280c4d3140d400",
+				State:     PendingState,
+				EventType: "github:push",
+				Started:   staticNow.Add(-120 * time.Hour).Add(-19 * time.Minute),
+				Ended:     time.Now().Add(-120 * time.Hour).Add(-18 * time.Minute),
+			},
+			&Build{
+				ID:        "2oijohpobna123213eewfeflkj323dbflkja",
+				Version:   "061f537fc5c71f0d3140d4028b44f9f21f59b0c4",
+				State:     UnknownState,
+				EventType: "github:push",
+				Started:   staticNow.Add(-5 * time.Minute),
+				Ended:     time.Now().Add(-128 * time.Second),
+			},
+			&Build{
+				ID:        "oijohpobna123213eewfeflkj323dbfl2kja",
+				Version:   "244f9f0d40537fc5c1f59061fb0c4d31471f028b",
+				State:     RunningState,
+				EventType: "github:pull_reqest",
+				Started:   staticNow.Add(-30 * time.Second),
+			},
+			&Build{},
+			nil,
+		},
+	}
 }
 
 func (f *fake) ProjectListPageContext() *ProjectListPageContext {
@@ -181,49 +228,7 @@ func (f *fake) ProjectBuildListPageContext(projectID string) *ProjectBuildListPa
 		ProjectName: "company1/AAAAAA",
 		ProjectNS:   "ci",
 		ProjectURL:  "git@github.com:slok/brigadeterm",
-		Builds: []*Build{
-			&Build{
-				ID:        "lkjdsbfdflkdsnflkjdsbflkjadbflkjaful",
-				Version:   "3140d400028b44f9f21f597b0c4d61f537fc51fc",
-				State:     SuccessedState,
-				EventType: "github:push",
-				Started:   staticNow.Add(-9999 * time.Hour),
-				Ended:     time.Now().Add(-9998 * time.Hour),
-			},
-			&Build{
-				ID:        "flkjdsbfuldflkdsnflkjdsbflkjadbflkja",
-				Version:   "1f537fc5c1f028b44f9f274d3140d40061f59b0c",
-				State:     FailedState,
-				EventType: "deploy",
-				Started:   staticNow.Add(-1 * time.Hour),
-				Ended:     time.Now().Add(-50 * time.Minute),
-			},
-			&Build{
-				ID:        "24351321ldflkds32kjdsbflkj323dbflkja",
-				Version:   "b44f9f21f59b7161f537fc5cf0280c4d3140d400",
-				State:     PendingState,
-				EventType: "github:push",
-				Started:   staticNow.Add(-120 * time.Hour).Add(-19 * time.Minute),
-				Ended:     time.Now().Add(-120 * time.Hour).Add(-18 * time.Minute),
-			},
-			&Build{
-				ID:        "2oijohpobna123213eewfeflkj323dbflkja",
-				Version:   "061f537fc5c71f0d3140d4028b44f9f21f59b0c4",
-				State:     UnknownState,
-				EventType: "github:push",
-				Started:   staticNow.Add(-5 * time.Minute),
-				Ended:     time.Now().Add(-128 * time.Second),
-			},
-			&Build{
-				ID:        "oijohpobna123213eewfeflkj323dbfl2kja",
-				Version:   "244f9f0d40537fc5c1f59061fb0c4d31471f028b",
-				State:     RunningState,
-				EventType: "github:pull_reqest",
-				Started:   staticNow.Add(-30 * time.Second),
-			},
-			&Build{},
-			nil,
-		},
+		Builds:      f.builds,
 	}
 }
 
@@ -347,4 +352,16 @@ func (f *fake) JobRunning(jobID string) bool {
 	}
 
 	return true
+}
+
+func (f *fake) RerunBuild(buildID string) error {
+	f.builds = append(f.builds, &Build{
+		ID:        fmt.Sprintf("rerun-%s", buildID),
+		Version:   "11111111111111111111111111111",
+		State:     SuccessedState,
+		EventType: "someEvent",
+		Started:   staticNow.Add(-9999 * time.Hour),
+		Ended:     time.Now().Add(-9998 * time.Hour),
+	})
+	return nil
 }

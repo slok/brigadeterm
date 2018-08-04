@@ -30,6 +30,8 @@ type Controller interface {
 	JobLogPageContext(jobID string) *JobLogPageContext
 	// JobRunning returns if the job is running or finished.
 	JobRunning(jobID string) bool
+	// RerunBuild will create a new build based on the build ID.
+	RerunBuild(buildID string) error
 }
 
 type controller struct {
@@ -222,4 +224,8 @@ func (c *controller) transformState(st brigademodel.State) State {
 	default:
 		return UnknownState
 	}
+}
+
+func (c *controller) RerunBuild(buildID string) error {
+	return c.brigade.RerunBuild(buildID)
 }

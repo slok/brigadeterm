@@ -59,7 +59,12 @@ func (m *Main) Run() error {
 	brigadeService := brigade.NewService(brigadek8s)
 
 	// Create controller.
-	uictrl := controller.NewController(brigadeService)
+	var uictrl controller.Controller
+	if m.flags.fake {
+		uictrl = controller.NewFakeController()
+	} else {
+		uictrl = controller.NewController(brigadeService)
+	}
 
 	// Create the terminal app.
 	app := tview.NewApplication()

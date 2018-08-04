@@ -23,6 +23,9 @@ type Service interface {
 	GetBuild(buildID string) (*brigademodel.Build, error)
 	// GetProjectBuilds will get all the builds of a project in descendant or ascendant order.
 	GetProjectBuilds(project *brigademodel.Project, desc bool) ([]*brigademodel.Build, error)
+	// RerunBuild will take a buildID and rerun that build. The build needs to exist
+	// if the build doesn't exist it will error.
+	RerunBuild(buildID string) error
 	// GetBuildJobs will get all the jobs of a build in descendant or ascendant order.
 	GetBuildJobs(BuildID string, desc bool) ([]*brigademodel.Job, error)
 	// GetJob will get a job.
@@ -248,4 +251,28 @@ func (s *service) GetJobLogStream(jobID string) (io.ReadCloser, error) {
 	}
 
 	return rc, nil
+}
+
+// RerunBuild satisfies Service interface.
+func (s *service) RerunBuild(buildID string) error {
+	if buildID == "" {
+		return fmt.Errorf("the build ID can't be empty")
+	}
+
+	bld, err := s.client.GetBuild(buildID)
+	if err != nil {
+		return err
+	}
+
+	// Replace some existing data so a new build is created
+	// based on the original one.
+	bld.ID = ""
+	bld.Worker = nil
+
+	err = s.client.CreateBuild(bld)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
