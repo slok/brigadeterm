@@ -15,7 +15,7 @@ const (
 	projectInfoFMT = `[yellow]Project: [white]%s
 [yellow]URL: [white]%s
 [yellow]Namespace: [white]%s`
-	projectBuildListUsage = `[yellow](F5) [white]Reload    [yellow](<-/Del) [white]Back    [yellow](ESC) [white]Home    [yellow](Q) [white]Quit`
+	projectBuildListUsage = `[yellow](F5) [white]Reload    [yellow](y) [white]Rerun build	[yellow](<-/Del) [white]Back    [yellow](ESC) [white]Home    [yellow](Q) [white]Quit`
 )
 
 const (
@@ -108,6 +108,10 @@ func (p *ProjectBuildList) Refresh(projectID string) {
 			// Reload.
 			case 'r', 'R':
 				p.router.LoadProjectBuildList(projectID)
+			// Rerun build
+			case 'y', 'Y':
+				p.rerunBuild()
+				p.router.LoadProjectBuildList(projectID)
 			// Exit
 			case 'q', 'Q':
 				p.router.Exit()
@@ -183,4 +187,15 @@ func (p *ProjectBuildList) fillBuildList(projectID string, ctx *controller.Proje
 			p.router.LoadBuildJobList(projectID, buildID)
 		}
 	})
+}
+
+func (p *ProjectBuildList) rerunBuild() {
+	// Get in which build of the atable are we.
+	row, _ := p.buildsTable.GetSelection()
+	// If the row is the header then don't do anything.
+	if row > 0 {
+		// Get build id and rerun the build.
+		buildID := p.buildsTable.GetCell(row, 3).Text
+		p.controller.RerunBuild(buildID)
+	}
 }
