@@ -19,6 +19,15 @@ const (
 	projectListUsage = `[yellow](F5) [white]Reload    [yellow](/) [white]Filter    [yellow](Q) [white]Quit`
 )
 
+// Columns IDs
+const (
+	prjStatusGlyphCol int = iota
+	prjNameCol
+	prjBuildTypeCol
+	prjBuildVerCol
+	prjBuildTimeCol
+)
+
 // ProjectList is the main page where the project list will be available.
 type ProjectList struct {
 	controller controller.Controller
@@ -152,11 +161,11 @@ func (p *ProjectList) fillProjectList(ctx *controller.ProjectListPageContext) {
 	p.projectsTable.Clear()
 
 	// Set header.
-	p.projectsTable.SetCell(0, 0, &tview.TableCell{Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	p.projectsTable.SetCell(0, 1, &tview.TableCell{Text: "Name", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	p.projectsTable.SetCell(0, 2, &tview.TableCell{Text: "Last build type", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	p.projectsTable.SetCell(0, 3, &tview.TableCell{Text: "Last build version", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	p.projectsTable.SetCell(0, 4, &tview.TableCell{Text: "Last build time", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	p.projectsTable.SetCell(0, prjStatusGlyphCol, &tview.TableCell{Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	p.projectsTable.SetCell(0, prjNameCol, &tview.TableCell{Text: "Name", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	p.projectsTable.SetCell(0, prjBuildTypeCol, &tview.TableCell{Text: "Last build type", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	p.projectsTable.SetCell(0, prjBuildVerCol, &tview.TableCell{Text: "Last build version", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	p.projectsTable.SetCell(0, prjBuildTimeCol, &tview.TableCell{Text: "Last build time", Align: tview.AlignCenter, Color: tcell.ColorYellow})
 
 	projectNameIDIndex := map[string]string{}
 
@@ -196,11 +205,11 @@ func (p *ProjectList) fillProjectList(ctx *controller.ProjectListPageContext) {
 		// Set the index so we can get the project ID on selection.
 		projectNameIDIndex[project.Name] = project.ID
 
-		p.projectsTable.SetCell(rowPosition, 0, &tview.TableCell{Text: icon, Align: tview.AlignLeft, Color: color})
-		p.projectsTable.SetCell(rowPosition, 1, &tview.TableCell{Text: project.Name, Align: tview.AlignLeft, Color: color})
-		p.projectsTable.SetCell(rowPosition, 2, &tview.TableCell{Text: event, Align: tview.AlignLeft, Color: color})
-		p.projectsTable.SetCell(rowPosition, 3, &tview.TableCell{Text: version, Align: tview.AlignLeft, Color: color})
-		p.projectsTable.SetCell(rowPosition, 4, &tview.TableCell{Text: fmt.Sprintf("%v ago", since), Align: tview.AlignLeft, Color: color})
+		p.projectsTable.SetCell(rowPosition, prjStatusGlyphCol, &tview.TableCell{Text: icon, Align: tview.AlignLeft, Color: color})
+		p.projectsTable.SetCell(rowPosition, prjNameCol, &tview.TableCell{Text: project.Name, Align: tview.AlignLeft, Color: color})
+		p.projectsTable.SetCell(rowPosition, prjBuildTypeCol, &tview.TableCell{Text: event, Align: tview.AlignLeft, Color: color})
+		p.projectsTable.SetCell(rowPosition, prjBuildVerCol, &tview.TableCell{Text: version, Align: tview.AlignLeft, Color: color})
+		p.projectsTable.SetCell(rowPosition, prjBuildTimeCol, &tview.TableCell{Text: fmt.Sprintf("%v ago", since), Align: tview.AlignLeft, Color: color})
 
 		// Add the last build status
 		columnPosition := 5
@@ -222,7 +231,7 @@ func (p *ProjectList) fillProjectList(ctx *controller.ProjectListPageContext) {
 		// If the row is the header then don't do anything.
 		if row > 0 {
 			// Get project ID cell and from commit the build ID.
-			cell := p.projectsTable.GetCell(row, 1)
+			cell := p.projectsTable.GetCell(row, prjNameCol)
 			projectID := projectNameIDIndex[cell.Text]
 			// Load build list page.
 			p.router.LoadProjectBuildList(projectID)

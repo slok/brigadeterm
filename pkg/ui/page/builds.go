@@ -23,6 +23,16 @@ const (
 	ProjectBuildListPageName = "projectbuildlist"
 )
 
+// Table columns.
+const (
+	bldStatusGlyphCol int = iota
+	bldEventTypeCol
+	bldVersionCol
+	bldIDCol
+	bldEndCol
+	bldDurationCol
+)
+
 // ProjectBuildList is the page where a projects build list will be available.
 type ProjectBuildList struct {
 	controller controller.Controller
@@ -145,12 +155,12 @@ func (p *ProjectBuildList) fillBuildList(projectID string, ctx *controller.Proje
 	p.buildsTable.Clear()
 
 	// Set header.
-	p.buildsTable.SetCell(0, 0, &tview.TableCell{Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	p.buildsTable.SetCell(0, 1, &tview.TableCell{Text: "Event type", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	p.buildsTable.SetCell(0, 2, &tview.TableCell{Text: "Version", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	p.buildsTable.SetCell(0, 3, &tview.TableCell{Text: "ID", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	p.buildsTable.SetCell(0, 4, &tview.TableCell{Text: "End", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	p.buildsTable.SetCell(0, 5, &tview.TableCell{Text: "Duration", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	p.buildsTable.SetCell(0, bldStatusGlyphCol, &tview.TableCell{Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	p.buildsTable.SetCell(0, bldEventTypeCol, &tview.TableCell{Text: "Event type", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	p.buildsTable.SetCell(0, bldVersionCol, &tview.TableCell{Text: "Version", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	p.buildsTable.SetCell(0, bldIDCol, &tview.TableCell{Text: "ID", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	p.buildsTable.SetCell(0, bldEndCol, &tview.TableCell{Text: "End", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	p.buildsTable.SetCell(0, bldDurationCol, &tview.TableCell{Text: "Duration", Align: tview.AlignCenter, Color: tcell.ColorYellow})
 
 	// TODO order by time.
 	rowPosition := 1
@@ -164,15 +174,15 @@ func (p *ProjectBuildList) fillBuildList(projectID string, ctx *controller.Proje
 			color = getColorFromState(build.State)
 
 			// Fill table.
-			p.buildsTable.SetCell(rowPosition, 0, &tview.TableCell{Text: icon, Align: tview.AlignLeft, Color: color})
-			p.buildsTable.SetCell(rowPosition, 1, &tview.TableCell{Text: build.EventType, Align: tview.AlignLeft, Color: color})
-			p.buildsTable.SetCell(rowPosition, 2, &tview.TableCell{Text: build.Version, Align: tview.AlignLeft, Color: color})
-			p.buildsTable.SetCell(rowPosition, 3, &tview.TableCell{Text: build.ID, Align: tview.AlignLeft, Color: color})
+			p.buildsTable.SetCell(rowPosition, bldStatusGlyphCol, &tview.TableCell{Text: icon, Align: tview.AlignLeft, Color: color})
+			p.buildsTable.SetCell(rowPosition, bldEventTypeCol, &tview.TableCell{Text: build.EventType, Align: tview.AlignLeft, Color: color})
+			p.buildsTable.SetCell(rowPosition, bldVersionCol, &tview.TableCell{Text: build.Version, Align: tview.AlignLeft, Color: color})
+			p.buildsTable.SetCell(rowPosition, bldIDCol, &tview.TableCell{Text: build.ID, Align: tview.AlignLeft, Color: color})
 			if hasFinished(build.State) {
 				timeAgo := time.Since(build.Ended).Truncate(time.Second * 1)
-				p.buildsTable.SetCell(rowPosition, 4, &tview.TableCell{Text: fmt.Sprintf("%v ago", timeAgo), Align: tview.AlignLeft, Color: color})
+				p.buildsTable.SetCell(rowPosition, bldEndCol, &tview.TableCell{Text: fmt.Sprintf("%v ago", timeAgo), Align: tview.AlignLeft, Color: color})
 				duration := build.Ended.Sub(build.Started).Truncate(time.Second * 1)
-				p.buildsTable.SetCell(rowPosition, 5, &tview.TableCell{Text: fmt.Sprintf("%v", duration), Align: tview.AlignLeft, Color: color})
+				p.buildsTable.SetCell(rowPosition, bldDurationCol, &tview.TableCell{Text: fmt.Sprintf("%v", duration), Align: tview.AlignLeft, Color: color})
 			}
 		}
 		rowPosition++
@@ -201,5 +211,5 @@ func (p *ProjectBuildList) rerunBuild() {
 }
 
 func (p *ProjectBuildList) getBuildIDFromTable(row int) string {
-	return p.buildsTable.GetCell(row, 3).Text
+	return p.buildsTable.GetCell(row, bldIDCol).Text
 }
