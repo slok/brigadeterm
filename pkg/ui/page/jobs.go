@@ -17,6 +17,15 @@ const (
 )
 
 const (
+	jbStatusGlyphCol int = iota
+	jbNameCol
+	jbImageCol
+	jbIDCol
+	jbEndedCol
+	jbDurationCol
+)
+
+const (
 	pipelineBlockString = `█`
 	pipelineStepTotal   = 50
 	pipelineColor       = tcell.ColorYellow
@@ -210,12 +219,12 @@ func (b *BuildJobList) fillJobsList(projectID, buildID string, ctx *controller.B
 	b.jobsList.Clear()
 
 	// Set header.
-	b.jobsList.SetCell(0, 0, &tview.TableCell{Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	b.jobsList.SetCell(0, 1, &tview.TableCell{Text: "Name", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	b.jobsList.SetCell(0, 2, &tview.TableCell{Text: "Image", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	b.jobsList.SetCell(0, 3, &tview.TableCell{Text: "ID", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	b.jobsList.SetCell(0, 4, &tview.TableCell{Text: "Ended", Align: tview.AlignCenter, Color: tcell.ColorYellow})
-	b.jobsList.SetCell(0, 5, &tview.TableCell{Text: "Duration", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	b.jobsList.SetCell(0, jbStatusGlyphCol, &tview.TableCell{Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	b.jobsList.SetCell(0, jbNameCol, &tview.TableCell{Text: "Name", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	b.jobsList.SetCell(0, jbImageCol, &tview.TableCell{Text: "Image", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	b.jobsList.SetCell(0, jbIDCol, &tview.TableCell{Text: "ID", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	b.jobsList.SetCell(0, jbEndedCol, &tview.TableCell{Text: "Ended", Align: tview.AlignCenter, Color: tcell.ColorYellow})
+	b.jobsList.SetCell(0, jbDurationCol, &tview.TableCell{Text: "Duration", Align: tview.AlignCenter, Color: tcell.ColorYellow})
 
 	// TODO order by time.
 	rowPosition := 1
@@ -229,15 +238,15 @@ func (b *BuildJobList) fillJobsList(projectID, buildID string, ctx *controller.B
 			color = getColorFromState(job.State)
 
 			// Fill table.
-			b.jobsList.SetCell(rowPosition, 0, &tview.TableCell{Text: icon, Align: tview.AlignLeft, Color: color})
-			b.jobsList.SetCell(rowPosition, 1, &tview.TableCell{Text: job.Name, Align: tview.AlignLeft, Color: color})
-			b.jobsList.SetCell(rowPosition, 2, &tview.TableCell{Text: job.Image, Align: tview.AlignLeft, Color: color})
-			b.jobsList.SetCell(rowPosition, 3, &tview.TableCell{Text: job.ID, Align: tview.AlignLeft, Color: color})
+			b.jobsList.SetCell(rowPosition, jbStatusGlyphCol, &tview.TableCell{Text: icon, Align: tview.AlignLeft, Color: color})
+			b.jobsList.SetCell(rowPosition, jbNameCol, &tview.TableCell{Text: job.Name, Align: tview.AlignLeft, Color: color})
+			b.jobsList.SetCell(rowPosition, jbImageCol, &tview.TableCell{Text: job.Image, Align: tview.AlignLeft, Color: color})
+			b.jobsList.SetCell(rowPosition, jbIDCol, &tview.TableCell{Text: job.ID, Align: tview.AlignLeft, Color: color})
 			if hasFinished(job.State) {
 				timeAgo := time.Since(job.Ended).Truncate(time.Second * 1)
-				b.jobsList.SetCell(rowPosition, 4, &tview.TableCell{Text: fmt.Sprintf("%v ago", timeAgo), Align: tview.AlignLeft, Color: color})
+				b.jobsList.SetCell(rowPosition, jbEndedCol, &tview.TableCell{Text: fmt.Sprintf("%v ago", timeAgo), Align: tview.AlignLeft, Color: color})
 				duration := job.Ended.Sub(job.Started).Truncate(time.Second * 1)
-				b.jobsList.SetCell(rowPosition, 5, &tview.TableCell{Text: fmt.Sprintf("%v", duration), Align: tview.AlignLeft, Color: color})
+				b.jobsList.SetCell(rowPosition, jbDurationCol, &tview.TableCell{Text: fmt.Sprintf("%v", duration), Align: tview.AlignLeft, Color: color})
 			}
 		}
 		rowPosition++
@@ -247,7 +256,7 @@ func (b *BuildJobList) fillJobsList(projectID, buildID string, ctx *controller.B
 	b.jobsList.SetSelectedFunc(func(row, column int) {
 		// If the row is the header then don't do anything.
 		if row > 0 {
-			jobID := b.jobsList.GetCell(row, 3).Text
+			jobID := b.jobsList.GetCell(row, jbIDCol).Text
 			// Load log page
 			b.router.LoadJobLog(projectID, buildID, jobID)
 		}
