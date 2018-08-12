@@ -1,6 +1,7 @@
 package apicache
 
 import (
+	"sort"
 	"time"
 
 	"k8s.io/api/core/v1"
@@ -11,10 +12,8 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-type secretStoreFactory struct{}
-
 // return a new cached store for secrets
-func (secretStoreFactory) new(client kubernetes.Interface, namespace string, resyncPeriod time.Duration, synced chan struct{}) cache.Store {
+func newSecretStore(client kubernetes.Interface, namespace string, resyncPeriod time.Duration, synced chan struct{}) cache.Store {
 	return newListStore(client, storeConfig{
 		resource:     "secrets",
 		namespace:    namespace,
@@ -36,9 +35,12 @@ func (secretStoreFactory) new(client kubernetes.Interface, namespace string, res
 //	"component": "build",
 //	"project":   proj.ID,
 // }
-func (a *apiCache) GetSecretsFilteredBy(selectors map[string]string) []v1.Secret {
-
+func (a *apiCache) GetSecretsFilteredBy(selectors map[string]string) ([]v1.Secret, error) {
 	var filteredSecrets []v1.Secret
+
+	if err := a.blockUntilAPICacheSynced(defaultCacheSyncTimeout); err != nil {
+		return filteredSecrets, err
+	}
 
 	for _, raw := range a.secretStore.List() {
 
@@ -54,6 +56,26 @@ func (a *apiCache) GetSecretsFilteredBy(selectors map[string]string) []v1.Secret
 
 		filteredSecrets = append(filteredSecrets, *secret)
 	}
+	sort.Sort(ByCreation(filteredSecrets))
+	return filteredSecrets, nil
+}
 
-	return filteredSecrets
+// ByCreation sorts secrets by their creation timestamp.
+type ByCreation []v1.Secret
+
+// Len returns the length of the secrets slice.
+func (b ByCreation) Len() int {
+	return len(b)
+}
+
+// Swap swaps the position of two indices.
+func (b ByCreation) Swap(i, j int) {
+	b[i], b[j] = b[j], b[i]
+}
+
+// Less tests that i is less than j.
+func (b ByCreation) Less(i, j int) bool {
+	jj := b[j].ObjectMeta.CreationTimestamp.Time
+	ii := b[i].ObjectMeta.CreationTimestamp.Time
+	return ii.After(jj)
 }

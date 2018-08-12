@@ -17,7 +17,7 @@
 
 [[constraint]]
   name = "github.com/Azure/brigade"
-  version = "v0.15.0"
+  version = "v0.16.0"
 
 [prune]
   go-tests = true
