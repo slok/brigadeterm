@@ -10,7 +10,7 @@
   version = "v0.21.0"
 
 [[projects]]
-  digest = "1:f5755ac7d78d83159560fde5366e6b23840d1a813b7ed2b2b7a230aa0ece5979"
+  digest = "1:95f02496cbdef8ed9fbd82cef043a4f6ac1374eeafbef335e2d28366c6b581b2"
   name = "github.com/Azure/brigade"
   packages = [
     "pkg/brigade",
@@ -20,8 +20,8 @@
     "pkg/storage/kube/apicache",
   ]
   pruneopts = "UT"
-  revision = "c683e76589f89abc1ffafd94595718ab501c2526"
-  version = "v0.15.0"
+  revision = "a3fa2cbe3fccce77713375605b556914c32c33a1"
+  version = "v0.16.0"
 
 [[projects]]
   digest = "1:a6775ff69b2873c65581fd54fcddb86b58ef0f1ab34fe6b27ddb4e5e47c92824"
