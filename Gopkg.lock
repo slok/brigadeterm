@@ -20,8 +20,8 @@
     "pkg/storage/kube/apicache",
   ]
   pruneopts = "UT"
-  revision = "a3fa2cbe3fccce77713375605b556914c32c33a1"
-  version = "v0.16.0"
+  revision = "8dad9088fddbb33505cdd710fef93e6b2d78c6e6"
+  version = "v0.17.0"
 
 [[projects]]
   digest = "1:a6775ff69b2873c65581fd54fcddb86b58ef0f1ab34fe6b27ddb4e5e47c92824"
