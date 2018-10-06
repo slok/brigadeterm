@@ -18,6 +18,8 @@ import (
 
 const (
 	brigadeVersionFMT = "brigadeterm %s"
+	kubeCliQPS        = 50
+	kubeCliBurst      = 50
 )
 
 var (
@@ -90,8 +92,16 @@ func (m *Main) loadKubernetesConfig() (*rest.Config, error) {
 	overrides := &clientcmd.ConfigOverrides{
 		CurrentContext: m.flags.kubeContext,
 	}
+	cfg, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loader, overrides).ClientConfig()
+	if err != nil {
+		return nil, err
+	}
 
-	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loader, overrides).ClientConfig()
+	// Set better client rate limits.
+	cfg.QPS = kubeCliQPS
+	cfg.Burst = kubeCliBurst
+
+	return cfg, nil
 }
 
 // printVersion prints the version of the app.
