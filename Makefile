@@ -4,7 +4,7 @@
 SERVICE_NAME := brigadeterm
 
 # Path of the go service inside docker
-DOCKER_GO_SERVICE_PATH := /go/src/github.com/slok/brigadeterm
+DOCKER_GO_SERVICE_PATH := /src
 
 # Shell to use for running scripts
 SHELL := $(shell which bash)
@@ -31,9 +31,14 @@ MOCKS_CMD := ./hack/scripts/mockgen.sh
 DOCKER_RUN_CMD := docker run --env ostype=$(OSTYPE) -v ${PWD}:$(DOCKER_GO_SERVICE_PATH) --rm -it $(SERVICE_NAME)
 BUILD_BINARY_CMD := VERSION=${VERSION} ./hack/scripts/build.sh
 BUILD_IMAGE_CMD := IMAGE_VERSION=${VERSION} ./hack/scripts/build-image.sh
-DEP_ENSURE_API_CMD := dep ensure -update github.com/slok/brigadeterm
-DEP_ENSURE_CMD := dep ensure
 CI_RELEASE_CMD := ./hack/scripts/travis-release.sh
+DEPS_CMD := GO111MODULE=on go mod tidy && GO111MODULE=on go mod vendor
+K8S_VERSION := 1.10.9
+SET_K8S_DEPS_CMD := GO111MODULE=on go mod edit \
+	-require=k8s.io/client-go@kubernetes-${K8S_VERSION} \
+	-require=k8s.io/apimachinery@kubernetes-${K8S_VERSION} \
+	-require=k8s.io/api@kubernetes-${K8S_VERSION} &&  \
+	$(DEPS_CMD)
 
 # environment dirs
 DEV_DIR := docker/dev
@@ -110,3 +115,12 @@ ci-release:
 .PHONY: mocks
 mocks: build
 	$(DOCKER_RUN_CMD) /bin/sh -c '$(MOCKS_CMD)'
+
+# Dependencies stuff.
+.PHONY: set-k8s-deps
+set-k8s-deps:
+	$(SET_K8S_DEPS_CMD)
+
+.PHONY: deps
+deps:
+	$(DEPS_CMD)

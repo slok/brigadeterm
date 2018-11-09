@@ -1,4 +1,4 @@
-FROM golang:1.10-alpine
+FROM golang:1.11-alpine
 
 ARG ostype=Linux
 
@@ -17,6 +17,13 @@ ARG gid=1000
 RUN bash -c 'if [ ${ostype} == Linux ]; then addgroup -g $gid brigadeterm; else addgroup brigadeterm; fi && \
     adduser -D -u $uid -G brigadeterm brigadeterm && \
     chown brigadeterm:brigadeterm -R /go'
-
 USER brigadeterm
-WORKDIR /go/src/github.com/slok/brigadeterm
+
+# Fill go mod cache.
+RUN mkdir /tmp/cache
+COPY go.mod /tmp/cache
+COPY go.sum /tmp/cache
+RUN cd /tmp/cache && \
+    go mod download
+
+WORKDIR /src
