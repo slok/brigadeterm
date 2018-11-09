@@ -15,3 +15,5 @@
 
 # binary
 bin/
+
+vendor/
