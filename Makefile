@@ -114,7 +114,8 @@ ci-release:
 # Mocks stuff in dev
 .PHONY: mocks
 mocks: build
-	$(DOCKER_RUN_CMD) /bin/sh -c '$(MOCKS_CMD)'
+	#$(DOCKER_RUN_CMD) /bin/sh -c '$(MOCKS_CMD)'
+	$(MOCKS_CMD)
 
 # Dependencies stuff.
 .PHONY: set-k8s-deps
