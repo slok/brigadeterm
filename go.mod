@@ -2,7 +2,7 @@ module github.com/slok/brigadeterm
 
 require (
 	cloud.google.com/go v0.21.0 // indirect
-	github.com/Azure/brigade v0.18.0
+	github.com/Azure/brigade v0.19.0
 	github.com/Azure/go-autorest v9.10.0+incompatible // indirect
 	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc // indirect
 	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect

@@ -1,7 +1,7 @@
 cloud.google.com/go v0.21.0 h1:083TLU7hqb1CzKeMhzDsCTP4uXkBGr6nnWuaHdVNBCI=
 cloud.google.com/go v0.21.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
-github.com/Azure/brigade v0.18.0 h1:Jb+sWQ0s91DhewpoEVzCiHvBz75pppVx3QeRDhlPsQI=
-github.com/Azure/brigade v0.18.0/go.mod h1:zFOSm8qOMV5GB5RSUXaanT28KTK0nI8GGIDDzJqEt5Q=
+github.com/Azure/brigade v0.19.0 h1:mdv3DUEODV8YHJ8SGiSdURM0KX7K0tV/ZNkIwFq4KKM=
+github.com/Azure/brigade v0.19.0/go.mod h1:zFOSm8qOMV5GB5RSUXaanT28KTK0nI8GGIDDzJqEt5Q=
 github.com/Azure/go-autorest v9.10.0+incompatible h1:bsri0JnC11oSNMWYkx5tCcfZziOjp8wKoAFaH9xI5Mc=
 github.com/Azure/go-autorest v9.10.0+incompatible/go.mod h1:r+4oMnoxhatjLLJ6zxSWATqVooLgysK6ZNox3g/xq24=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc h1:cAKDfWh5VpdgMhJosfJnn5/FoN2SRZ4p7fJNX58YPaU=
