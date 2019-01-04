@@ -1,6 +1,6 @@
-## 0.x.x / 2019-xx-xx
+## 0.9.1 / 2019-01-04
 
-* [ENHANCEMENT] (K8s) Add BRIGADE_NAMESPACE env var to set default brigade namespace without the need to use the --namespace flag.
+* [ENHANCEMENT] (Kubernetes) Add BRIGADE_NAMESPACE env var to set default brigade namespace without the need to use the --namespace flag.
 
 ## 0.9.0 / 2018-12-25
 
