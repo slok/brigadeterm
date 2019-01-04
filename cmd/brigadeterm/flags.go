@@ -10,6 +10,10 @@ import (
 	"k8s.io/client-go/util/homedir"
 )
 
+const (
+	brigadeNamespaceEnv = "BRIGADE_NAMESPACE"
+)
+
 type cmdFlags struct {
 	app              *kingpin.Application
 	kubeConfig       string
@@ -37,7 +41,7 @@ func (c *cmdFlags) init() error {
 
 	// register flags
 	c.app.Flag("kubeconfig", "Kubernetes configuration path").Default(kubehome).StringVar(&c.kubeConfig)
-	c.app.Flag("namespace", "Kubernetes namespace where brigade is running").Short('n').Default("default").StringVar(&c.brigadeNamespace)
+	c.app.Flag("namespace", "Kubernetes namespace where brigade is running (overrides $BRIGADE_NAMESPACE env var)").Short('n').Default("default").Envar(brigadeNamespaceEnv).StringVar(&c.brigadeNamespace)
 	c.app.Flag("reload-interval", "The interval the UI will autoreload").Short('r').Default("3s").DurationVar(&c.reloadInterval)
 	c.app.Flag("context", "Kubernetes context to use. Default to current context configured in kubeconfig").Short('c').Default("").StringVar(&c.kubeContext)
 	c.app.Flag("version", "Show app version").Short('v').BoolVar(&c.showVersion)
