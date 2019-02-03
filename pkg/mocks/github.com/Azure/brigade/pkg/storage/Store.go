@@ -297,6 +297,29 @@ func (_m *Store) GetProjects() ([]*brigade.Project, error) {
 	return r0, r1
 }
 
+// GetStorageClassNames provides a mock function with given fields:
+func (_m *Store) GetStorageClassNames() ([]string, error) {
+	ret := _m.Called()
+
+	var r0 []string
+	if rf, ok := ret.Get(0).(func() []string); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetWorker provides a mock function with given fields: buildID
 func (_m *Store) GetWorker(buildID string) (*brigade.Worker, error) {
 	ret := _m.Called(buildID)
@@ -385,4 +408,18 @@ func (_m *Store) GetWorkerLogStreamFollow(job *brigade.Worker) (io.ReadCloser, e
 	}
 
 	return r0, r1
+}
+
+// ReplaceProject provides a mock function with given fields: proj
+func (_m *Store) ReplaceProject(proj *brigade.Project) error {
+	ret := _m.Called(proj)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*brigade.Project) error); ok {
+		r0 = rf(proj)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
