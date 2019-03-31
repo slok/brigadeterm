@@ -8,4 +8,4 @@ package mocks // import "github.com/slok/brigadeterm/pkg/mocks"
 //go:generate mockery -output ./service/brigade -outpkg brigade -dir ../service/brigade -name Service
 
 // wrappers mocks.
-//go:generate mockery -output ./github.com/Azure/brigade/pkg/storage -outpkg storage -dir ./mockwrappers/brigade -name Store
+//go:generate mockery -output ./github.com/brigadecore/brigade/pkg/storage -outpkg storage -dir ./mockwrappers/brigade -name Store

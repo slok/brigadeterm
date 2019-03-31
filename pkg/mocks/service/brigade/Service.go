@@ -2,7 +2,7 @@
 
 package brigade
 
-import brigade "github.com/Azure/brigade/pkg/brigade"
+import brigade "github.com/brigadecore/brigade/pkg/brigade"
 import io "io"
 import mock "github.com/stretchr/testify/mock"
 

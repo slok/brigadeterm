@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"time"
 
-	azurebrigade "github.com/Azure/brigade/pkg/brigade"
+	azurebrigade "github.com/brigadecore/brigade/pkg/brigade"
 
 	brigademodel "github.com/slok/brigadeterm/pkg/model/brigade"
 	"github.com/slok/brigadeterm/pkg/service/brigade"
