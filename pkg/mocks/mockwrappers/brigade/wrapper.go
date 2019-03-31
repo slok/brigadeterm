@@ -1,7 +1,7 @@
 package mocks
 
 import (
-	"github.com/Azure/brigade/pkg/storage"
+	"github.com/brigadecore/brigade/pkg/storage"
 )
 
 // Store is the wrapper for brigade store interface for mocks.

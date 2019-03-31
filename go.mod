@@ -2,10 +2,10 @@ module github.com/slok/brigadeterm
 
 require (
 	cloud.google.com/go v0.21.0 // indirect
-	github.com/Azure/brigade v1.0.0-beta.2
 	github.com/Azure/go-autorest v9.10.0+incompatible // indirect
 	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc // indirect
 	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
+	github.com/brigadecore/brigade v1.0.0
 	github.com/davecgh/go-spew v1.1.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/gdamore/encoding v0.0.0-20151215212835-b23993cbb635 // indirect

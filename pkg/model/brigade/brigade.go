@@ -1,7 +1,7 @@
 package brigade
 
 import (
-	"github.com/Azure/brigade/pkg/brigade"
+	"github.com/brigadecore/brigade/pkg/brigade"
 )
 
 // Project is a brigade project.

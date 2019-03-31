@@ -1,13 +1,13 @@
 cloud.google.com/go v0.21.0 h1:083TLU7hqb1CzKeMhzDsCTP4uXkBGr6nnWuaHdVNBCI=
 cloud.google.com/go v0.21.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
-github.com/Azure/brigade v1.0.0-beta.2 h1:8R/9uBxF8hbvjCH9s2mls8ZCqjJnkhO4f2EWgFrRqbI=
-github.com/Azure/brigade v1.0.0-beta.2/go.mod h1:zFOSm8qOMV5GB5RSUXaanT28KTK0nI8GGIDDzJqEt5Q=
 github.com/Azure/go-autorest v9.10.0+incompatible h1:bsri0JnC11oSNMWYkx5tCcfZziOjp8wKoAFaH9xI5Mc=
 github.com/Azure/go-autorest v9.10.0+incompatible/go.mod h1:r+4oMnoxhatjLLJ6zxSWATqVooLgysK6ZNox3g/xq24=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc h1:cAKDfWh5VpdgMhJosfJnn5/FoN2SRZ4p7fJNX58YPaU=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf h1:qet1QNfXsQxTZqLG4oE62mJzwPIB8+Tee4RNCL9ulrY=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
+github.com/brigadecore/brigade v1.0.0 h1:1kCJXxQ4DKg0Wx351gLTvz/4nvtAzpByYhg35joVgdY=
+github.com/brigadecore/brigade v1.0.0/go.mod h1:iLqTaDK65VRt+Pwp4Y7fT0rie0nEahGU8brY5azWOxc=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=

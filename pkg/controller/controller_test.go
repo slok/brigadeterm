@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	azurebrigade "github.com/Azure/brigade/pkg/brigade"
+	azurebrigade "github.com/brigadecore/brigade/pkg/brigade"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 

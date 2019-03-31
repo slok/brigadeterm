@@ -5,7 +5,7 @@ import (
 	"io"
 	"sort"
 
-	"github.com/Azure/brigade/pkg/storage"
+	"github.com/brigadecore/brigade/pkg/storage"
 
 	brigademodel "github.com/slok/brigadeterm/pkg/model/brigade"
 )

@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	azurebrigade "github.com/Azure/brigade/pkg/brigade"
-	mstore "github.com/slok/brigadeterm/pkg/mocks/github.com/Azure/brigade/pkg/storage"
+	azurebrigade "github.com/brigadecore/brigade/pkg/brigade"
+	mstore "github.com/slok/brigadeterm/pkg/mocks/github.com/brigadecore/brigade/pkg/storage"
 	brigademodel "github.com/slok/brigadeterm/pkg/model/brigade"
 	"github.com/slok/brigadeterm/pkg/service/brigade"
 )
